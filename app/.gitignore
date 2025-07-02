@@ -1,0 +1,29 @@
+# General
+.DS_Store
+*.log
+*.env
+*.env.local
+.env.*.local
+!.env.example
+logs/
+debug.log
+
+# Backend
+/backend/node_modules/
+backend/.env
+backend/dist/
+
+# Frontend
+/frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.next/
+frontend/out/
+
+# IDEs
+.vscode/
+.idea/
+
+# Vercel / Render
+.vercel/
+.render/

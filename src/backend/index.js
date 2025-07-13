@@ -6,6 +6,7 @@ import { PORT } from './config.js';
 
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import profileRoutes from './routes/profileRoutes.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/users', userRoutes); // Registro de usuario
 app.use('/api/auth', authRoutes);  // Login
+app.use('/api/profile', profileRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));

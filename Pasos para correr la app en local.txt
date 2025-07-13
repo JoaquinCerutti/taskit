@@ -1,6 +1,6 @@
 1. "npm i" en backend y frontend.
 
-2. Instalar PosgreSQL.
+2. Instalar PostgreSQL.
 
 3. En el archivo ".env" colocar DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/nombre_db"
 y el puerto 3001 en PORT que es donde corre el backEnd

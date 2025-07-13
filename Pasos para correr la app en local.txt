@@ -1,0 +1,13 @@
+1. "npm i" en backend y frontend.
+
+2. Instalar PosgreSQL.
+
+3. En el archivo ".env" colocar DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/nombre_db"
+y el puerto 3001 en PORT que es donde corre el backEnd
+(Cuando instalan PostgreSQL les va a pedir que elijan un usuario y contraseña)
+
+4. En consola de comandos parados en carpeta "backend" hacer "npx prisma migrate dev", esto va a crear una BBDD
+local en su PC llamada taskitdb en base a los modelos especificados en prisma (el ORM que usamos) con todas las
+tablas que vayamos colocando ahí. Entonces ya con eso tienen una BBDD funcional para probar todo.
+
+5. "npm run dev" en backEnd y "npm run dev" en frontEnd. Ya debería funcionar todo.

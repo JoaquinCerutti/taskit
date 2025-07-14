@@ -13,10 +13,18 @@ export const loginUser = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) return res.status(401).json({ error: 'Usuario no encontrado' });
+    if (!user) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({ error: 'Debes verificar tu correo electrónico antes de iniciar sesión' });
+    }
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(401).json({ error: 'Contraseña incorrecta' });
+    if (!valid) {
+      return res.status(401).json({ error: 'Contraseña incorrecta' });
+    }
 
     const token = jwt.sign(
       { userId: user.id, email: user.email },
@@ -24,8 +32,16 @@ export const loginUser = async (req, res) => {
       { expiresIn: '2h' }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username
+      }
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 };

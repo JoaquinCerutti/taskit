@@ -8,6 +8,7 @@ import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import verifyRoutes from './routes/verifyRoutes.js';
+import passwordRoutes from './routes/passwordRoutes.js';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use('/api/users', userRoutes); // Registro de usuario
 app.use('/api/auth', authRoutes);  // Login
 app.use('/api/profile', profileRoutes); // Perfil del usuario con su información
 app.use('/api/verify', verifyRoutes); // Verificar mail del user
+app.use('/api/password', passwordRoutes); // Ruta que administra reestablecimiento de contraseñas
 
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));

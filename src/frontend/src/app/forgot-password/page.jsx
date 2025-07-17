@@ -2,27 +2,70 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import Image from 'next/image';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState(false);
 
   const handleSubmit = async e => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:3001/api/password/forgot-password', { email });
       setMessage(res.data.message);
+      setError(false);
     } catch {
       setMessage('Error al enviar el correo');
+      setError(true);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Restablecer contraseña</h2>
-      <input type="email" placeholder="Tu email" onChange={e => setEmail(e.target.value)} required />
-      <button type="submit">Enviar enlace</button>
-      {message && <p>{message}</p>}
-    </form>
+    <div className="min-h-screen bg-gradient-to-br from-[#064431] to-[#0FAA7B] flex items-center justify-center p-4 font-inter">
+      <div className="bg-white rounded-[2rem] shadow-lg p-10 w-full max-w-md text-sm relative z-10">
+        <div className="flex flex-col items-center text-center mb-6">
+          {/* CAMBIÁ ESTA IMAGEN SEGÚN TU PREFERENCIA */}
+          <Image
+            src="/imgs/taskit-logo.png" // Cambiá a /imgs/holiday-logo.png si preferís
+            alt="Logo"
+            width={200}
+            height={60}
+            className="mb-4"
+          />
+          <h2 className="text-xl font-bold text-gray-800">Restablecer contraseña</h2>
+          <p className="text-gray-500 mt-1">Ingresá tu email y te enviaremos un enlace</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-1 text-gray-700">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="tucorreo@ejemplo.com"
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg transition duration-200"
+          >
+            Enviar enlace
+          </button>
+
+          {message && (
+            <p className={`text-center text-sm mt-2 ${error ? 'text-red-600' : 'text-green-600'}`}>
+              {message}
+            </p>
+          )}
+        </form>
+      </div>
+    </div>
   );
 }

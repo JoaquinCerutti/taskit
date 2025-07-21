@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { login } from '@/services/authService';
+import { Eye, EyeOff } from 'lucide-react'; // 👈 Íconos importados
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -20,7 +21,7 @@ export default function LoginPage() {
       const data = await login(form.email, form.password);
       localStorage.setItem('token', data.token);
       alert('Login exitoso');
-      router.push('/profile');
+      router.push('/main');
     } catch (err) {
       alert('Credenciales inválidas');
     }
@@ -28,8 +29,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#064431] to-[#0FAA7B] flex items-center justify-center p-4 relative font-inter">
-      {/* Logo gigante # de fondo */}
-      <div className="absolute text-[200px] font-black text-white/5 select-none">#</div>
 
       {/* Contenedor del login */}
       <div className="relative z-10 bg-white rounded-[2rem] shadow-lg p-10 w-full max-w-md text-sm">
@@ -81,9 +80,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500 text-sm"
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>

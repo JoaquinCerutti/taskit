@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { register } from '@/services/authService';
 import Image from 'next/image';
+import { Camera } from 'lucide-react'; // 👈 nuevo ícono
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -49,6 +50,15 @@ export default function RegisterPage() {
     }
   };
 
+  // Rutas simuladas (placeholder)
+  const sidebarRoutes = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Novedades', path: '/novedades' },
+    { label: 'Tickets', path: '/mantenimiento' },
+    { label: 'Stock e Inventario', path: '/inventario' },
+    { label: 'Staff', path: '/usuarios' },
+  ];
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -63,12 +73,13 @@ export default function RegisterPage() {
           <span className="text-2xl text-gray-600 cursor-pointer">☰</span>
         </div>
         <div className="flex flex-col gap-2">
-          {['Dashboard', 'Novedades', 'Tickets', 'Stock e Inventario', 'Staff'].map((item, idx) => (
+          {sidebarRoutes.map(({ label, path }, idx) => (
             <button
               key={idx}
+              onClick={() => router.push(path)}
               className="w-full text-left px-4 py-2 rounded-md text-sm text-gray-700 hover:shadow hover:bg-gray-100 transition"
             >
-              {item}
+              {label}
             </button>
           ))}
         </div>
@@ -77,7 +88,9 @@ export default function RegisterPage() {
       {/* Contenido principal */}
       <main className="flex-1 p-10">
         <div className="mb-6">
-          <button className="text-blue-600 text-sm mb-2">{'< Volver'}</button>
+          <button onClick={() => router.back()} className="text-blue-600 text-sm mb-2">
+            {'< Volver'}
+          </button>
           <h1 className="text-2xl font-bold">Nuevo Usuario</h1>
           <p className="text-sm text-gray-500">Ingrese los datos para crear un nuevo usuario</p>
         </div>
@@ -90,7 +103,7 @@ export default function RegisterPage() {
                 {preview ? (
                   <img src={preview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-4xl text-gray-400">📷</span>
+                  <Camera className="w-10 h-10 text-gray-400" />
                 )}
               </div>
               <input
@@ -107,71 +120,31 @@ export default function RegisterPage() {
 
           {/* Campos del formulario */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-            <div>
-              <label className="block text-sm font-medium mb-1">Nombre</label>
-              <input
-                name="nombre"
-                onChange={handleChange}
-                placeholder="Ingresar nombre"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Apellido</label>
-              <input
-                name="apellido"
-                onChange={handleChange}
-                placeholder="Ingresar apellido"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Documento</label>
-              <input
-                name="documento"
-                onChange={handleChange}
-                placeholder="Ingresar documento"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Dirección</label>
-              <input
-                name="direccion"
-                onChange={handleChange}
-                placeholder="Ingresar dirección"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Email personal</label>
-              <input
-                name="email"
-                type="email"
-                onChange={handleChange}
-                placeholder="Email personal"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Email corporativo</label>
-              <input
-                name="emailCorporativo"
-                type="email"
-                onChange={handleChange}
-                placeholder="Email corporativo"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Teléfono</label>
-              <input
-                name="telefono"
-                onChange={handleChange}
-                placeholder="Ingresar teléfono"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
+            {/* Campos repetidos como los anteriores */}
+            {[
+              { label: 'Nombre', name: 'nombre' },
+              { label: 'Apellido', name: 'apellido' },
+              { label: 'Documento', name: 'documento' },
+              { label: 'Dirección', name: 'direccion' },
+              { label: 'Email personal', name: 'email', type: 'email' },
+              { label: 'Email corporativo', name: 'emailCorporativo', type: 'email' },
+              { label: 'Teléfono', name: 'telefono' },
+              { label: 'Usuario', name: 'username' },
+              { label: 'Contraseña', name: 'password', type: 'password' },
+            ].map(({ label, name, type = 'text' }) => (
+              <div key={name}>
+                <label className="block text-sm font-medium mb-1">{label}</label>
+                <input
+                  name={name}
+                  type={type}
+                  onChange={handleChange}
+                  placeholder={`Ingresar ${label.toLowerCase()}`}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+            ))}
+
+            {/* Select Género */}
             <div>
               <label className="block text-sm font-medium mb-1">Género</label>
               <select
@@ -185,25 +158,8 @@ export default function RegisterPage() {
                 <option value="otro">Otro</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Usuario</label>
-              <input
-                name="username"
-                onChange={handleChange}
-                placeholder="Ingresar usuario"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Contraseña</label>
-              <input
-                name="password"
-                type="password"
-                onChange={handleChange}
-                placeholder="Ingresar contraseña"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-            </div>
+
+            {/* Select Rol */}
             <div>
               <label className="block text-sm font-medium mb-1">Rol</label>
               <select
@@ -232,6 +188,7 @@ export default function RegisterPage() {
           <button
             type="button"
             className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
+            onClick={() => router.push('/main')}
           >
             Cancelar
           </button>

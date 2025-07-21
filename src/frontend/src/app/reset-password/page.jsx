@@ -3,6 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import axios from 'axios';
+import { Lock, Eye, EyeOff } from 'lucide-react'; // 👈 Íconos importados
 
 export default function ResetPasswordPage() {
   const token = useSearchParams().get('token');
@@ -32,7 +33,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#064431] to-[#0FAA7B] flex items-center justify-center p-4 font-inter">
       <div className="bg-white rounded-[2rem] shadow-lg p-10 w-full max-w-md text-sm relative z-10">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="text-5xl text-green-600 mb-3">🔒</div>
+          <Lock className="w-10 h-10 text-green-600 mb-3" />
           <h2 className="text-xl font-bold text-gray-800">Ingresá tu nueva contraseña</h2>
           <p className="text-gray-500 mt-1">Asegurate de elegir una clave segura</p>
         </div>
@@ -55,9 +56,9 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShow(!show)}
-              className="absolute right-3 top-[35px] text-gray-500 text-sm"
+              className="absolute right-3 top-[35px] text-gray-500"
             >
-              {show ? '🙈' : '👁️'}
+              {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
 

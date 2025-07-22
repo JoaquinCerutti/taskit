@@ -68,8 +68,25 @@ export const createUser = async (req, res) => {
       message: 'Usuario creado. Revisá tu email corporativo para verificar tu cuenta.',
       user: safePerfil
     });
-  } catch (error) {
-    console.error('Error en createUser:', error);
-    return res.status(500).json({ error: 'Error al registrar usuario' });
+  }  catch (error) {
+  console.error('Error en createUser:', error);
+
+  // Prisma: unique constraint violated
+  if (error.code === 'P2002') {
+    const campoDuplicado = error.meta?.target?.[0];
+
+    let mensaje = 'Ya existe un registro con ese valor';
+    if (campoDuplicado === 'email_corporativo') mensaje = 'El email corporativo ya está registrado';
+    else if (campoDuplicado === 'username') mensaje = 'El nombre de usuario ya existe';
+
+    return res.status(400).json({
+      errors: [{ param: campoDuplicado, msg: mensaje }],
+    });
   }
+
+  return res.status(500).json({ error: 'Error al registrar usuario' });
+}
+
+
+
 };

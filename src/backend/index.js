@@ -19,11 +19,11 @@ app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 
+
 // Rutas
 app.get('/', (req, res) => {
   res.send('API funcionando');
 });
-
 app.use('/api/users', userRoutes); // Registro de usuario
 app.use('/api/auth', authRoutes);  // Login
 app.use('/api/profile', profileRoutes); // Perfil del usuario con su información

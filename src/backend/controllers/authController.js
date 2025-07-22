@@ -34,7 +34,7 @@ export const loginUser = async (req, res) => {
       { expiresIn: '2h' }
     );
 
-    // Desestructura para eliminar solo los campos sensibles
+    // Desestructura para eliminar campos sensibles
     const {
       password: _pwd,
       verificationToken,
@@ -44,10 +44,15 @@ export const loginUser = async (req, res) => {
       ...perfil
     } = usuario;
 
-    // Devuelve token + todos los datos de perfil
+    // Convertimos documento a string si es BigInt
+    const safeUser = {
+      ...perfil,
+      documento: perfil.documento ? perfil.documento.toString() : null
+    };
+
     return res.json({
       token,
-      user: perfil
+      user: safeUser
     });
   } catch (error) {
     console.error(error);

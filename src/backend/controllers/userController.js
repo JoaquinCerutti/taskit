@@ -48,7 +48,7 @@ export const createUser = async (req, res) => {
     // 4️ Enviamos mail de verificación
     await sendVerificationEmail(emailCorporativo, verificationToken);
 
-    // 5️ Quitamos campos sensibles antes de responder
+    // 5️ Quitamos campos sensibles y convertimos BigInt
     const {
       password: _pwd,
       verificationToken: _vt,
@@ -58,9 +58,15 @@ export const createUser = async (req, res) => {
       ...perfil
     } = newUsuario;
 
+    // Convertir documento a string si existe
+    const safePerfil = {
+      ...perfil,
+      documento: perfil.documento ? perfil.documento.toString() : null
+    };
+
     return res.status(201).json({
       message: 'Usuario creado. Revisá tu email corporativo para verificar tu cuenta.',
-      user: perfil
+      user: safePerfil
     });
   } catch (error) {
     console.error('Error en createUser:', error);

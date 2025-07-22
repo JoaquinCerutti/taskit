@@ -11,37 +11,46 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const usuario = await prisma.usuario.findUnique({
+      where: { emailCorporativo: email }
+    });
 
-    if (!user) {
+    if (!usuario) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
-
-    if (!user.isVerified) {
+    if (!usuario.isVerified) {
       return res.status(403).json({ error: 'Debes verificar tu correo electrónico antes de iniciar sesión' });
     }
 
-    const valid = await bcrypt.compare(password, user.password);
+    const valid = await bcrypt.compare(password, usuario.password);
     if (!valid) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
+    // Genera el JWT
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: usuario.idUsuario, email: usuario.emailCorporativo },
       SECRET_KEY,
       { expiresIn: '2h' }
     );
 
-    res.json({
+    // Desestructura para eliminar solo los campos sensibles
+    const {
+      password: _pwd,
+      verificationToken,
+      verificationTokenExpires,
+      resetToken,
+      resetTokenExpires,
+      ...perfil
+    } = usuario;
+
+    // Devuelve token + todos los datos de perfil
+    return res.json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username
-      }
+      user: perfil
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    return res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 };

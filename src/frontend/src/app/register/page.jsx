@@ -4,11 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { register } from '@/services/authService';
 import Image from 'next/image';
-import { Camera } from 'lucide-react'; // 👈 nuevo ícono
+import { Camera } from 'lucide-react';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
-    email: '',
     username: '',
     password: '',
     nombre: '',
@@ -16,6 +15,7 @@ export default function RegisterPage() {
     documento: '',
     direccion: '',
     emailCorporativo: '',
+    emailPersonal: '',
     genero: '',
     telefono: '',
     rol: '',
@@ -42,15 +42,15 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await register(form.email, form.username, form.password);
+      await register(form); // se espera que reciba un objeto completo
       alert('Usuario creado con éxito');
       router.push('/login');
     } catch (err) {
       alert('Error al registrar');
+      console.error(err);
     }
   };
 
-  // Rutas simuladas (placeholder)
   const sidebarRoutes = [
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Novedades', path: '/novedades' },
@@ -95,6 +95,7 @@ export default function RegisterPage() {
           <p className="text-sm text-gray-500">Ingrese los datos para crear un nuevo usuario</p>
         </div>
 
+        {/* Formulario */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-6 flex flex-col lg:flex-row gap-6">
           {/* Subir foto */}
           <div className="flex flex-col items-center w-full lg:w-1/3 border border-gray-200 rounded-lg p-6">
@@ -120,13 +121,12 @@ export default function RegisterPage() {
 
           {/* Campos del formulario */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-            {/* Campos repetidos como los anteriores */}
             {[
               { label: 'Nombre', name: 'nombre' },
               { label: 'Apellido', name: 'apellido' },
               { label: 'Documento', name: 'documento' },
               { label: 'Dirección', name: 'direccion' },
-              { label: 'Email personal', name: 'email', type: 'email' },
+              { label: 'Email personal', name: 'emailPersonal', type: 'email' },
               { label: 'Email corporativo', name: 'emailCorporativo', type: 'email' },
               { label: 'Teléfono', name: 'telefono' },
               { label: 'Usuario', name: 'username' },
@@ -153,9 +153,9 @@ export default function RegisterPage() {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">Seleccionar género</option>
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-                <option value="otro">Otro</option>
+                <option value="HOMBRE">Masculino</option>
+                <option value="MUJER">Femenino</option>
+                <option value="OTRO">Otro</option>
               </select>
             </div>
 
@@ -176,8 +176,8 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        {/* Botones */}
-        <div className="flex justify-end gap-4 mt-6">
+        {/* Botones fuera del form */}
+        <div className="bg-white rounded-xl shadow px-6 pb-6 pt-0 mt-[-24px] flex justify-end gap-4">
           <button
             type="submit"
             onClick={handleSubmit}
@@ -187,8 +187,8 @@ export default function RegisterPage() {
           </button>
           <button
             type="button"
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
             onClick={() => router.push('/main')}
+            className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
           >
             Cancelar
           </button>

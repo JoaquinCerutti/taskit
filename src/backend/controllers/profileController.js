@@ -3,27 +3,29 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const getProfile = async (req, res) => {
-  const { userId } = req.user;
+  const { idUsuario } = req.user; // viene desde el token
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        createAt: true,
-        updatedAt: true
-      }
+    const usuario = await prisma.usuario.findUnique({
+      where: { idUsuario }
     });
 
-    if (!user) {
+    if (!usuario) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json({ user });
+    const {
+      password,
+      verificationToken,
+      verificationTokenExpires,
+      resetToken,
+      resetTokenExpires,
+      ...perfil
+    } = usuario;
+
+    return res.json({ user: perfil });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al obtener perfil' });
+    console.error('Error en getProfile:', error);
+    return res.status(500).json({ error: 'Error al obtener perfil' });
   }
 };

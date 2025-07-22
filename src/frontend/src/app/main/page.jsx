@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, Newspaper, Wrench, Package, Users, BarChart3 } from 'lucide-react';
+import {
+  LogOut, Newspaper, Wrench, Package, Users, BarChart3
+} from 'lucide-react';
 
 const modules = [
   { name: 'Novedades', path: '/novedades', icon: <Newspaper className="w-6 h-6 mb-2 text-green-600" /> },
@@ -15,16 +18,36 @@ const modules = [
 
 export default function MainPage() {
   const router = useRouter();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+
+    if (!token || !storedUser) {
+      router.push('/login');
+    } else {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+      } catch {
+        localStorage.clear();
+        router.push('/login');
+      }
+    }
+  }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.clear();
     router.push('/login');
   };
+
+  if (!user) return null; // o loading spinner
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#064431] to-[#0FAA7B] flex flex-col items-center justify-start py-10 px-4 font-inter">
       
-      {/* Header con logos y logout */}
+      {/* Header */}
       <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 px-10 text-center max-w-xl w-full relative mb-10">
         <button
           onClick={handleLogout}
@@ -47,11 +70,11 @@ export default function MainPage() {
           height={50}
           className="mx-auto"
         />
-        <h1 className="text-2xl text-gray-800 font-bold mt-4">Panel Principal</h1>
+        <h1 className="text-2xl text-gray-800 font-bold mt-4">Bienvenido/a, {user.nombre}</h1>
         <p className="text-gray-600 text-sm">Seleccioná una sección para comenzar</p>
       </div>
 
-      {/* Tarjetas de navegación */}
+      {/* Módulos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
         {modules.map((mod) => (
           <Link

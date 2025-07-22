@@ -5,26 +5,36 @@ const prisma = new PrismaClient();
 export const verifyEmail = async (req, res) => {
   const { token } = req.query;
 
+  if (!token) {
+    return res.status(400).json({ error: 'Se requiere un token de verificación' });
+  }
+
   try {
-    const user = await prisma.user.findFirst({
-      where: { verificationToken: token }
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: 'Token inválido o expirado' });
-    }
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        isVerified: true,
-        verificationToken: null
+    // 1️ Buscamos al usuario por verificationToken y que no haya expirado
+    const usuario = await prisma.usuario.findFirst({
+      where: {
+        verificationToken: String(token),
+        verificationTokenExpires: { gt: new Date() }
       }
     });
 
-    res.json({ message: 'Email verificado correctamente' });
+    if (!usuario) {
+      return res.status(404).json({ error: 'Token inválido o expirado' });
+    }
+
+    // 2️ Actualizamos isVerified y limpiamos los campos de token
+    await prisma.usuario.update({
+      where: { idUsuario: usuario.idUsuario },
+      data: {
+        isVerified: true,
+        verificationToken: null,
+        verificationTokenExpires: null
+      }
+    });
+
+    return res.json({ message: 'Email verificado correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al verificar email' });
+    console.error('Error al verificar email:', error);
+    return res.status(500).json({ error: 'Error al verificar email' });
   }
 };

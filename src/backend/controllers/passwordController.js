@@ -11,26 +11,34 @@ export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ error: 'Email no registrado' });
+    // 🔄 Cambiado a prisma.usuario y búsqueda por emailCorporativo
+    const usuario = await prisma.usuario.findUnique({
+      where: { emailCorporativo: email }
+    });
+    if (!usuario) {
+      return res.status(404).json({ error: 'Email no registrado' });
+    }
 
+    // Genera token y expiración
     const resetToken = uuidv4();
     const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
 
-    await prisma.user.update({
-      where: { email },
+    // 🔄 Actualiza por idUsuario y campos mapeados
+    await prisma.usuario.update({
+      where: { idUsuario: usuario.idUsuario },
       data: {
         resetToken,
         resetTokenExpires: expires
       }
     });
 
-    await sendResetPasswordEmail(email, resetToken);
+    // Envía al emailCorporativo
+    await sendResetPasswordEmail(usuario.emailCorporativo, resetToken);
 
-    res.json({ message: 'Email de recuperación enviado' });
+    return res.json({ message: 'Email de recuperación enviado' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al solicitar recuperación' });
+    return res.status(500).json({ error: 'Error al solicitar recuperación' });
   }
 };
 
@@ -38,19 +46,24 @@ export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
   try {
-    const user = await prisma.user.findFirst({
+    // 🔄 Busca en prisma.usuario usando resetToken y resetTokenExpires
+    const usuario = await prisma.usuario.findFirst({
       where: {
         resetToken: token,
         resetTokenExpires: { gt: new Date() }
       }
     });
 
-    if (!user) return res.status(400).json({ error: 'Token inválido o expirado' });
+    if (!usuario) {
+      return res.status(400).json({ error: 'Token inválido o expirado' });
+    }
 
+    // Hashea la nueva contraseña
     const hashed = await bcrypt.hash(password, 10);
 
-    await prisma.user.update({
-      where: { id: user.id },
+    // 🔄 Actualiza por idUsuario y limpia los campos de token
+    await prisma.usuario.update({
+      where: { idUsuario: usuario.idUsuario },
       data: {
         password: hashed,
         resetToken: null,
@@ -58,9 +71,9 @@ export const resetPassword = async (req, res) => {
       }
     });
 
-    res.json({ message: 'Contraseña actualizada correctamente' });
+    return res.json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al actualizar la contraseña' });
+    return res.status(500).json({ error: 'Error al actualizar la contraseña' });
   }
 };

@@ -54,10 +54,13 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold text-green-700 mb-6 text-center">Perfil</h1>
         {user ? (
           <ul className="space-y-2 text-green-900">
-            <li><span className="font-semibold">ID:</span> {user.id}</li>
-            <li><span className="font-semibold">Email:</span> {user.email}</li>
-            <li><span className="font-semibold">Username:</span> {user.username}</li>
-            <li><span className="font-semibold">Creado:</span> {new Date(user.createAt).toLocaleString()}</li>
+            <li><span className="font-semibold">ID:</span> {user.idUsuario}</li>
+            <li><span className="font-semibold">Email corporativo:</span> {user.emailCorporativo}</li>
+            <li><span className="font-semibold">Usuario:</span> {user.username}</li>
+            <li><span className="font-semibold">Nombre:</span> {user.nombre} {user.apellido}</li>
+            <li><span className="font-semibold">Género:</span> {user.genero}</li>
+            <li><span className="font-semibold">Teléfono:</span> {user.telefono}</li>
+            <li><span className="font-semibold">Creado:</span> {new Date(user.createdAt).toLocaleString()}</li>
             <li><span className="font-semibold">Actualizado:</span> {new Date(user.updatedAt).toLocaleString()}</li>
           </ul>
         ) : (

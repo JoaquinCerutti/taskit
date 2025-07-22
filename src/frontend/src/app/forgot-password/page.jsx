@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import api from '@/utils/api'; // ✅ en lugar de axios
+import api from '@/utils/api'; 
 import Image from 'next/image';
 
 export default function ForgotPasswordPage() {

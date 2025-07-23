@@ -23,7 +23,7 @@ export const createUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = uuidv4();
-    const verificationTokenExpires = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    const verificationTokenExpires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24h
 
     const newUsuario = await prisma.usuario.create({
       data: {
@@ -42,7 +42,7 @@ export const createUser = async (req, res) => {
       },
     });
 
-    // 👇 Buscar el rol por nombre y crear en tabla intermedia
+    // Buscar el rol por nombre y crear en tabla intermedia
     const rolEncontrado = await prisma.role.findUnique({
       where: { nombreRol: rol }
     });
@@ -59,6 +59,10 @@ export const createUser = async (req, res) => {
       }
     });
 
+    // ✅ Enviar email de verificación
+    await sendVerificationEmail(newUsuario.emailCorporativo, verificationToken);
+
+    // Preparar respuesta sin campos sensibles
     const {
       password: _pwd,
       verificationToken: _vt,
@@ -92,7 +96,6 @@ export const createUser = async (req, res) => {
     return res.status(500).json({ error: 'Error al registrar usuario' });
   }
 };
-
 
 // Obtener todos los usuarios
 export const getAllUsers = async (req, res) => {

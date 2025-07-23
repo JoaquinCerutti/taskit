@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios';
+import UserHeader from '@/components/UserHeader';
+
 
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState([]);
@@ -30,6 +32,9 @@ export default function UsuariosPage() {
   );
 
   return (
+
+
+    
     <div className="flex min-h-screen bg-gray-100 font-inter">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-sm p-6 hidden md:flex flex-col justify-between">
@@ -46,21 +51,44 @@ export default function UsuariosPage() {
         </div>
         <div className="text-right text-xs text-gray-400 mt-8">© 2025 TaskIT</div>
       </aside>
+      
+      
 
       {/* Main content */}
       <main className="flex-1 p-10">
         <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Usuarios</h1>
-            <p className="text-sm text-gray-500">Administra fácilmente las cuentas y permisos de tu equipo</p>
-          </div>
-          <button
-            onClick={() => router.push('/register')}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700"
-          >
-            Nuevo Usuario
-          </button>
-        </div>
+  {/* Izquierda: título y subtítulo */}
+  <div>
+    <h1 className="text-2xl font-bold">Usuarios</h1>
+    <p className="text-sm text-gray-500">Administra fácilmente las cuentas y permisos de tu equipo</p>
+  </div>
+
+  {/* Derecha: botón + notificación + usuario */}
+  <div className="flex items-center gap-4">
+    <button
+      onClick={() => router.push('../register')}
+      className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
+    >
+      Nuevo Usuario
+    </button>
+
+    {/* Ícono de notificación */}
+    <button className="text-gray-600 hover:text-black">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+    </button>
+
+    {/* Componente de usuario */}
+    <UserHeader />
+  </div>
+</div>
+
+
+
+
 
         <div className="bg-white rounded-xl shadow p-6">
           <div className="flex justify-between items-center mb-4">

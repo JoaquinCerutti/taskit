@@ -92,7 +92,7 @@ export default function RegisterPage() {
   };
 
   const sidebarRoutes = [
-    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Menú Principal', path: '/main' },
     { label: 'Novedades', path: '/novedades' },
     { label: 'Tickets', path: '/mantenimiento' },
     { label: 'Stock e Inventario', path: '/inventario' },
@@ -187,6 +187,7 @@ export default function RegisterPage() {
               {errors.genero && <p className="text-sm text-red-600 mt-1">{errors.genero}</p>}
             </div>
 
+          
             {/* Rol */}
             <div>
               <label className="block text-sm font-medium mb-1">Rol</label>
@@ -196,12 +197,13 @@ export default function RegisterPage() {
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
               >
                 <option value="">Seleccionar puesto</option>
-                <option value="admin">Administrador</option>
-                <option value="gerente">Gerente</option>
-                <option value="staff">Staff</option>
+                <option value="GERENTE">GERENTE</option>
+                <option value="EMPLEADO">EMPLEADO</option>
+                <option value="MANTENIMIENTO">MANTENIMIENTO</option>
               </select>
               {errors.rol && <p className="text-sm text-red-600 mt-1">{errors.rol}</p>}
             </div>
+
           </div>
         </form>
 

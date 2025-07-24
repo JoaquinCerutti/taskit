@@ -11,7 +11,7 @@ import {
 const modules = [
   { name: 'Novedades', path: '/novedades', icon: <Newspaper className="w-6 h-6 mb-2 text-green-600" /> },
   { name: 'Mantenimiento', path: '/mantenimiento', icon: <Wrench className="w-6 h-6 mb-2 text-green-600" /> },
-  { name: 'Insumos', path: '/insumos', icon: <Package className="w-6 h-6 mb-2 text-green-600" /> },
+  { name: 'Insumos', path: '/insumos/consultar_insumos', icon: <Package className="w-6 h-6 mb-2 text-green-600" /> },
   { name: 'Usuarios', path: '/consultar', icon: <Users className="w-6 h-6 mb-2 text-green-600" /> },
   { name: 'Reportes y Estadísticas', path: '/reportes', icon: <BarChart3 className="w-6 h-6 mb-2 text-green-600" /> },
 ];

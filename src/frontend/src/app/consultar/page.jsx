@@ -44,7 +44,7 @@ export default function UsuariosPage() {
             <button onClick={() => router.push('/main')} className="text-left hover:font-semibold">Menú Principal</button>
             <button onClick={() => router.push('/novedades')} className="text-left hover:font-semibold">Novedades</button>
             <button onClick={() => router.push('/mantenimiento')} className="text-left hover:font-semibold">Tickets</button>
-            <button onClick={() => router.push('/insumos')} className="text-left hover:font-semibold">Stock e Inventario</button>
+            <button onClick={() => router.push('insumos/consultar_insumos')} className="text-left hover:font-semibold">Stock e Inventario</button>
             <button onClick={() => router.push('/consultar')} className="text-left font-semibold text-green-700">Usuarios</button>
             <button onClick={() => router.push('/reportes')}className="text-left hover:font-semibold">Reportes</button>
           </nav>

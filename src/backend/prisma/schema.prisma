@@ -14,6 +14,15 @@ enum Gender {
   OTRO
 }
 
+model CategoriaInsumo {
+  idCategoria Int     @id @default(autoincrement()) @map("id_categoria")
+  nombre      String  @unique                       @map("nombre")
+  insumos     Insumo[]                              @relation("CategoriaInsumos")
+
+  @@map("categorias_insumo")
+}
+
+
 /// Roles de usuario
 model Role {
   idRol       Int           @id @default(autoincrement()) @map("id_rol")
@@ -179,20 +188,25 @@ model MensajeTicket {
 
 /// Unidades de medida para insumos
 model Unidades {
-  idUnidad    Int              @id @default(autoincrement()) @map("id_unidad")
-  descripcion String           @map("descripcion")
-  insumos     Insumo[]         @relation("UnidadInsumos")
+  idUnidad    Int       @id @default(autoincrement()) @map("id_unidad")
+  descripcion String    @unique @map("descripcion") 
+  insumos     Insumo[]  @relation("UnidadInsumos")
 
   @@map("unidades")
 }
 
-/// Insumos del inventario
+
 model Insumo {
   idInsumo       Int               @id @default(autoincrement()) @map("id_insumo")
   nombre         String            @map("nombre")
   cantidad       Int               @map("cantidad")
   idUnidad       Int               @map("id_unidad")
+  idCategoria    Int               @map("id_categoria")
+  precioUnitario Float             @default(0)                   @map("precio_unitario")
+  descripcion    String?           @map("descripcion")
+
   unidad         Unidades          @relation("UnidadInsumos", fields: [idUnidad], references: [idUnidad])
+  categoria      CategoriaInsumo   @relation("CategoriaInsumos", fields: [idCategoria], references: [idCategoria])
   insumosXTicket InsumosXTicket[]  @relation("InsumoInsumosXTickets")
 
   @@map("insumos")

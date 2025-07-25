@@ -1,0 +1,22 @@
+Gerente 
+Acceso total a todos los módulos y permisos.
+Debe poder visualizar quién vio una novedad/ticket para hacer un seguimiento del trabajo de los empelados.
+Debe poder visualizar quién vio una novedad/ticket para hacer un seguimiento del trabajo de los empelados.
+
+
+Supervisor
+Acceso total a todos los módulos.
+No puede crear/modificar usuarios.
+
+
+Empleados internos 
+Acceso a novedades y mantenimiento.
+Puede crear novedades, leerlas y modificar las propias.
+Puede crear tickets, leerlos y modificar los propios.
+
+
+Empleados de mantenimiento
+Acceso a módulo de mantenimiento
+Puede visualizar tickets, resolverlos.
+
+Los tickets y novedades tienen un chat integrado, es decir que cualquiera que pueda ver un ticket/novedad puede dejar un mensaje en el mism@.

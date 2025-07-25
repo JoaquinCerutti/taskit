@@ -3,27 +3,30 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  const roles = ['GERENTE', 'EMPLEADO', 'MANTENIMIENTO'];
+  // Roles del sistema
+  const roles = ['GERENTE', 'SUPERVISOR', 'EMPLEADO_INTERNO', 'MANTENIMIENTO'];
 
   await prisma.role.createMany({
     data: roles.map(nombreRol => ({ nombreRol })),
-    skipDuplicates: true  // evita error si ya existen
+    skipDuplicates: true,  // evita error si ya existen
   });
 
   console.log('Seed de roles completado');
 
-
+  // Categorías de insumo
   await prisma.categoriaInsumo.createMany({
-  data: [
-    { nombre: 'Plomería' },
-    { nombre: 'Electricidad' },
-    { nombre: 'Limpieza' },
-    { nombre: 'Otros' },
-  ],
-  skipDuplicates: true,
-});
+    data: [
+      { nombre: 'Plomeria' },
+      { nombre: 'Electricidad' },
+      { nombre: 'Limpieza' },
+      { nombre: 'Otros' },
+    ],
+    skipDuplicates: true,
+  });
 
-  // Seed de unidades
+  console.log('Seed de categorías de insumo completado');
+
+  // Seed de unidades de medida
   const unidades = [
     'Unidad',
     'Gramo',
@@ -31,7 +34,7 @@ async function main() {
     'Litro',
     'Mililitro',
     'Metro',
-    'Centímetro',
+    'Centimetro',
   ];
 
   for (const descripcion of unidades) {
@@ -42,11 +45,8 @@ async function main() {
     });
   }
 
-  console.log('✅ Seed de unidades completado');
+  console.log('Seed de unidades completado');
 }
-
-
-
 
 main()
   .catch(e => {

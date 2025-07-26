@@ -198,7 +198,8 @@ export default function RegisterPage() {
               >
                 <option value="">Seleccionar puesto</option>
                 <option value="GERENTE">GERENTE</option>
-                <option value="EMPLEADO">EMPLEADO</option>
+                <option value="SUPERVISOR">SUPERVISOR</option>
+                <option value="EMPLEADO_INTERNO">EMPLEADO_INTERNO</option>
                 <option value="MANTENIMIENTO">MANTENIMIENTO</option>
               </select>
               {errors.rol && <p className="text-sm text-red-600 mt-1">{errors.rol}</p>}

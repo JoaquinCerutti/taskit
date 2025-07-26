@@ -137,7 +137,6 @@ export const getAllUsers = async (req, res) => {
 };
 
 //Obtener por id
-
 export const getUserById = async (req, res) => {
   const { id } = req.params;
 
@@ -165,6 +164,8 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener usuario' });
   }
 };
+
+// Actualizar usuario por ID
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const {
@@ -181,7 +182,15 @@ export const updateUserById = async (req, res) => {
       }
     });
 
-    // 🔧 Solución directa: transformar BigInt y limpiar
+    // Actualizar también el campo activo en rolUsuario si se modificó
+    if (typeof activo === 'boolean') {
+      await prisma.rolUsuario.updateMany({
+        where: { idUsuario: parseInt(id) },
+        data: { activo }
+      });
+    }
+
+    // Solución directa: transformar BigInt y limpiar
     const {
       password,
       verificationToken,

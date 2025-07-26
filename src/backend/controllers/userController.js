@@ -5,6 +5,7 @@ import { sendVerificationEmail } from '../utils/mailer.js';
 
 const prisma = new PrismaClient();
 
+// Crear usuario
 export const createUser = async (req, res) => {
   try {
     const {
@@ -136,7 +137,7 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-//Obtener por id
+// Obtener por id
 export const getUserById = async (req, res) => {
   const { id } = req.params;
 

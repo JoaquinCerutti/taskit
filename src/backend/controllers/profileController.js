@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Obtener perfil de usuario
+// Este endpoint devuelve el perfil del usuario autenticado
 export const getProfile = async (req, res) => {
   const { idUsuario } = req.user; // viene desde el token
 

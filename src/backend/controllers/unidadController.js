@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Obtener todas las unidades
 export const getUnidades = async (req, res) => {
   try {
     const unidades = await prisma.unidades.findMany({

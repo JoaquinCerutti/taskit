@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Verificar email
+// Este endpoint verifica el email del usuario usando un token de verificación
 export const verifyEmail = async (req, res) => {
   const { token } = req.query;
 

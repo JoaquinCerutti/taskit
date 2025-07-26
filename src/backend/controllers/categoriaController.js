@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+// Obtener todas las categorías
 export const getCategorias = async (req, res) => {
   try {
     const categorias = await prisma.categoriaInsumo.findMany({

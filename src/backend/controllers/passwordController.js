@@ -7,11 +7,12 @@ import { sendResetPasswordEmail } from '../utils/mailer.js';
 dotenv.config();
 const prisma = new PrismaClient();
 
+// Solicitar recuperación de contraseña
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // 🔄 Cambiado a prisma.usuario y búsqueda por emailCorporativo
+    // Cambiado a prisma.usuario y búsqueda por emailCorporativo
     const usuario = await prisma.usuario.findUnique({
       where: { emailCorporativo: email }
     });
@@ -23,7 +24,7 @@ export const forgotPassword = async (req, res) => {
     const resetToken = uuidv4();
     const expires = new Date(Date.now() + 1000 * 60 * 60); // 1 hora
 
-    // 🔄 Actualiza por idUsuario y campos mapeados
+    // Actualiza por idUsuario y campos mapeados
     await prisma.usuario.update({
       where: { idUsuario: usuario.idUsuario },
       data: {
@@ -42,11 +43,12 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
+// Actualizar contraseña
 export const resetPassword = async (req, res) => {
   const { token, password } = req.body;
 
   try {
-    // 🔄 Busca en prisma.usuario usando resetToken y resetTokenExpires
+    // Busca en prisma.usuario usando resetToken y resetTokenExpires
     const usuario = await prisma.usuario.findFirst({
       where: {
         resetToken: token,
@@ -61,7 +63,7 @@ export const resetPassword = async (req, res) => {
     // Hashea la nueva contraseña
     const hashed = await bcrypt.hash(password, 10);
 
-    // 🔄 Actualiza por idUsuario y limpia los campos de token
+    // Actualiza por idUsuario y limpia los campos de token
     await prisma.usuario.update({
       where: { idUsuario: usuario.idUsuario },
       data: {

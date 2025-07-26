@@ -7,6 +7,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET;
 
+// Loguear usuario
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 

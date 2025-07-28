@@ -72,7 +72,6 @@ export default function RegisterPage() {
     try {
       await register(form);
       alert('Usuario creado con éxito');
-      router.push('/login');
     } catch (err) {
       if (err?.response?.data?.errors) {
   const backendErrors = {};
@@ -228,3 +227,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

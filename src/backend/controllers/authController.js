@@ -12,25 +12,32 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const usuario = await prisma.usuario.findUnique({
-      where: { emailCorporativo: email }
+    // Al buscar el usuario para login:
+    const user = await prisma.usuario.findUnique({
+      where: { emailCorporativo: email },
+      include: {
+        rolUsuario: {
+          where: { activo: true },
+          include: { rol: true }
+        }
+      }
     });
 
-    if (!usuario) {
+    if (!user) {
       return res.status(401).json({ error: 'Usuario no encontrado' });
     }
-    if (!usuario.isVerified) {
+    if (!user.isVerified) {
       return res.status(403).json({ error: 'Debes verificar tu correo electrónico antes de iniciar sesión' });
     }
 
-    const valid = await bcrypt.compare(password, usuario.password);
+    const valid = await bcrypt.compare(password, user.password);
     if (!valid) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
     // Genera el JWT
     const token = jwt.sign(
-      { userId: usuario.idUsuario, email: usuario.emailCorporativo },
+      { userId: user.idUsuario, email: user.emailCorporativo },
       SECRET_KEY,
       { expiresIn: '2h' }
     );
@@ -43,14 +50,16 @@ export const loginUser = async (req, res) => {
       resetToken,
       resetTokenExpires,
       ...perfil
-    } = usuario;
+    } = user;
 
     // Convertimos documento a string si es BigInt
     const safeUser = {
       ...perfil,
-      documento: perfil.documento ? perfil.documento.toString() : null
+      documento: perfil.documento ? perfil.documento.toString() : null,
+      rol: user.rolUsuario[0]?.rol?.nombreRol || 'Sin rol'
     };
 
+    // Enviar safeUser en la respuesta:
     return res.json({
       token,
       user: safeUser

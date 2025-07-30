@@ -5,7 +5,8 @@ const prisma = new PrismaClient();
 // Crear insumo
 export const createInsumo = async (req, res) => {
   try {
-    const { nombre, cantidad, precioUnitario, idUnidad, idCategoria } = req.body;
+    const { nombre, cantidad, precioUnitario, idUnidad, idCategoria, stockMinimo } = req.body;
+
 
     const nuevoInsumo = await prisma.insumo.create({
       data: {
@@ -18,6 +19,8 @@ export const createInsumo = async (req, res) => {
         categoria: {
           connect: { idCategoria },
         },
+        stockMinimo: parseInt(stockMinimo) || 0,
+
       },
     });
 
@@ -71,7 +74,8 @@ export const getInsumoById = async (req, res) => {
 export const updateInsumo = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { nombre, cantidad, precioUnitario, descripcion, idUnidad, idCategoria } = req.body;
+    const { nombre, cantidad, precioUnitario, descripcion, idUnidad, idCategoria, stockMinimo } = req.body;
+
 
     if (!idUnidad || !idCategoria) {
       return res.status(400).json({ error: 'Unidad y Categoría son obligatorias' });
@@ -90,6 +94,8 @@ export const updateInsumo = async (req, res) => {
         categoria: {
           connect: { idCategoria },
         },
+        stockMinimo: parseInt(stockMinimo) || 0,
+
       },
     });
 

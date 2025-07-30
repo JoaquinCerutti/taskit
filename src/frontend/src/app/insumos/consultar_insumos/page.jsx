@@ -33,11 +33,12 @@ export default function ConsultarInsumosPage() {
   }, []);
 
 
-   const obtenerEstadoStock = (cantidad) => {
-    if (cantidad === 0) return { texto: 'Agotado', clase: 'bg-red-200 text-red-800' };
-    if (cantidad < 10) return { texto: 'Stock bajo', clase: 'bg-yellow-200 text-yellow-800' };
-    return { texto: 'En stock', clase: 'bg-green-200 text-green-800' };
-  };
+   const obtenerEstadoStock = (cantidad, stockMinimo) => {
+  if (cantidad === 0) return { texto: 'Agotado', clase: 'bg-red-200 text-red-800' };
+  if (cantidad < stockMinimo) return { texto: 'Stock bajo', clase: 'bg-yellow-200 text-yellow-800' };
+  return { texto: 'En stock', clase: 'bg-green-200 text-green-800' };
+};
+
 
  const insumosFiltrados = insumos.filter((i) => {
   const valor =
@@ -164,7 +165,8 @@ export default function ConsultarInsumosPage() {
             <tbody>
               {insumosPaginados.length > 0 ? (
                 insumosPaginados.map((insumo) => {
-                  const estado = obtenerEstadoStock(insumo.cantidad);
+                  const estado = obtenerEstadoStock(insumo.cantidad, insumo.stockMinimo || 10);
+
                   return (
                     <tr key={insumo.idInsumo} className="border-b hover:bg-gray-50">
                       <td>{insumo.nombre}</td>

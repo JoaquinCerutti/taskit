@@ -204,6 +204,8 @@ model Insumo {
   idCategoria    Int               @map("id_categoria")
   precioUnitario Float             @default(0)                   @map("precio_unitario")
   descripcion    String?           @map("descripcion")
+  stockMinimo    Int @default(0)   @map("stock_minimo")
+
 
   unidad         Unidades          @relation("UnidadInsumos", fields: [idUnidad], references: [idUnidad])
   categoria      CategoriaInsumo   @relation("CategoriaInsumos", fields: [idCategoria], references: [idCategoria])

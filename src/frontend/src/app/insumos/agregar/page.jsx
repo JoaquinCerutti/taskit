@@ -16,6 +16,8 @@ export default function AgregarInsumoPage() {
   const [categorias, setCategorias] = useState([]);
   const [unidades, setUnidades] = useState([]);
   const [error, setError] = useState('');
+  const [stockMinimo, setStockMinimo] = useState('');
+
 
   const costoTotal = cantidad && precioUnitario ? (cantidad * precioUnitario).toFixed(2) : '';
 
@@ -41,9 +43,10 @@ export default function AgregarInsumoPage() {
     e.preventDefault();
     setError('');
 
-    if (!nombre || !cantidad || !precioUnitario || !idUnidad || !idCategoria) {
-      return setError('Todos los campos son obligatorios');
-    }
+   if (!nombre || !cantidad || !precioUnitario || !idUnidad || !idCategoria || stockMinimo === '') {
+  return setError('Todos los campos son obligatorios');
+}
+
 
     try {
       await axios.post('http://localhost:3001/api/insumos', {
@@ -52,6 +55,7 @@ export default function AgregarInsumoPage() {
         precioUnitario: parseFloat(precioUnitario),
         idUnidad: parseInt(idUnidad),
         idCategoria: parseInt(idCategoria),
+        stockMinimo: parseInt(stockMinimo),
       });
       router.push('/insumos/consultar_insumos');
     } catch (err) {
@@ -157,6 +161,18 @@ export default function AgregarInsumoPage() {
                   </option>
                 ))}
               </select>
+            </div>
+            
+            <div>
+              <label className="block font-medium mb-1">Stock mínimo</label>
+              <input
+                type="number"
+                min="0"
+                className="w-full border px-3 py-2 rounded"
+                placeholder="Cantidad mínima antes de reponer"
+                value={stockMinimo}
+                onChange={(e) => setStockMinimo(e.target.value)}
+              />
             </div>
 
             <div>

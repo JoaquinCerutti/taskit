@@ -7,7 +7,6 @@ import axios from 'axios';
 export default function EditarInsumoPage() {
   const router = useRouter();
   const { id } = useParams();
-
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
   const [precioUnitario, setPrecioUnitario] = useState('');
@@ -17,6 +16,8 @@ export default function EditarInsumoPage() {
   const [categorias, setCategorias] = useState([]);
   const [unidades, setUnidades] = useState([]);
   const [error, setError] = useState('');
+  const [stockMinimo, setStockMinimo] = useState('');
+
 
   const costoTotal = cantidad && precioUnitario ? (cantidad * precioUnitario).toFixed(2) : '';
 
@@ -36,8 +37,7 @@ export default function EditarInsumoPage() {
         setDescripcion(insumo.descripcion || '');
         setIdUnidad(insumo.unidad?.idUnidad?.toString() || '');
         setIdCategoria(insumo.categoria?.idCategoria?.toString() || '');
-
-
+        setStockMinimo(insumo.stockMinimo?.toString() || '');
         setCategorias(catRes.data);
         setUnidades(uniRes.data);
       } catch (err) {
@@ -58,8 +58,9 @@ export default function EditarInsumoPage() {
   cantidad: parseInt(cantidad),
   precioUnitario: parseFloat(precioUnitario),
   descripcion,
-  idCategoria: parseInt(idCategoria), // ✅ Asegurate que no sea string vacío
-  idUnidad: parseInt(idUnidad),       // ✅ Mismo aquí
+  idCategoria: parseInt(idCategoria),
+  idUnidad: parseInt(idUnidad),
+  stockMinimo: parseInt(stockMinimo),
 });
       router.push('/insumos/consultar_insumos');
     } catch (err) {
@@ -122,6 +123,18 @@ export default function EditarInsumoPage() {
               ))}
             </select>
           </div>
+
+          <div>
+            <label className="font-medium mb-1 block">Stock mínimo</label>
+            <input
+              type="number"
+              min="0"
+              value={stockMinimo}
+              onChange={(e) => setStockMinimo(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+            />
+          </div>
+
 
           <div>
             <label className="font-medium mb-1 block">Costo Total</label>

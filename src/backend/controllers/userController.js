@@ -117,8 +117,8 @@ export const getAllUsers = async (req, res) => {
 
     const safeUsers = usuarios.map(u => ({
   id: u.idUsuario,
-  nombre: `${u.nombre} ${u.apellido}`, // 👈 Agregamos apellido al nombre
-  apellido: u.apellido,                // (opcional si no lo usás)
+  nombre: `${u.nombre} ${u.apellido}`, 
+  apellido: u.apellido,                
   email: u.emailCorporativo,
   username: u.username,
   estado: u.activo ? 'ACTIVO' : 'INACTIVO',

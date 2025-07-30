@@ -155,43 +155,77 @@ export const getUserById = async (req, res) => {
 
     const { password, verificationToken, resetToken, ...rest } = user;
 
-    res.json({
-      ...rest,
-      documento: rest.documento?.toString() || '',
-      rol: user.rolUsuario[0]?.rol?.nombreRol || 'Sin rol'
-    });
+   res.json({
+  ...rest,
+  documento: rest.documento?.toString() || '',
+  rol: user.rolUsuario[0]?.rol?.nombreRol || 'Sin rol',
+  idRol: user.rolUsuario[0]?.idRol || null // <- esto es clave
+});
+
+
+
   } catch (err) {
     console.error('Error en getUserById:', err);
     res.status(500).json({ error: 'Error al obtener usuario' });
   }
 };
-
-// Actualizar usuario por ID
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const {
     nombre, apellido, emailPersonal, direccion,
-    telefono, genero, activo
+    telefono, genero, activo, idRol
   } = req.body;
 
   try {
+    console.log('🛬 PUT recibido. Body:', req.body);
+
+    // 1. Actualizar datos básicos del usuario
     const user = await prisma.usuario.update({
       where: { idUsuario: parseInt(id) },
       data: {
-        nombre, apellido, emailPersonal, direccion, telefono,
-        genero, activo
+        nombre,
+        apellido,
+        emailPersonal,
+        direccion,
+        telefono,
+        genero,
+        activo
       }
     });
 
-    // Actualizar también el campo activo en rolUsuario si se modificó
-    if (typeof activo === 'boolean') {
+    // 2. Si se envió un nuevo rol, desactivar roles anteriores y asignar el nuevo
+    if (idRol) {
       await prisma.rolUsuario.updateMany({
-        where: { idUsuario: parseInt(id) },
-        data: { activo }
+        where: {
+          idUsuario: parseInt(id),
+          activo: true,
+          fecFin: null
+        },
+        data: {
+          activo: false,
+          fecFin: new Date()
+        }
+      });
+
+      await prisma.rolUsuario.create({
+        data: {
+          idUsuario: parseInt(id),
+          idRol: parseInt(idRol),
+          idUsuarioCrea: 1 // ⚠️ Reemplazar por ID real del usuario autenticado
+        }
       });
     }
 
-    // Solución directa: transformar BigInt y limpiar
+    // 3. Buscar el nombre del rol actualizado (si se pasó uno)
+    let rolNombre = null;
+    if (idRol) {
+      const role = await prisma.role.findUnique({
+        where: { idRol: parseInt(idRol) }
+      });
+      rolNombre = role?.nombreRol || 'Desconocido';
+    }
+
+    // 4. Preparar respuesta segura sin campos sensibles
     const {
       password,
       verificationToken,
@@ -202,9 +236,10 @@ export const updateUserById = async (req, res) => {
     } = user;
 
     const safeUser = {
-      ...rest,
-      documento: user.documento ? user.documento.toString() : null
-    };
+  ...rest,
+  idRol: parseInt(idRol), 
+  documento: user.documento ? user.documento.toString() : null
+};
 
     res.json({
       message: 'Usuario actualizado con éxito',
@@ -212,8 +247,49 @@ export const updateUserById = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Error al actualizar usuario:', err);
+    console.error('❌ Error al actualizar usuario:', err);
     res.status(500).json({ error: 'Error al actualizar usuario' });
   }
 };
+
+
+
+
+export const updateRolUsuario = async (req, res) => {
+  const { id } = req.params;
+  const { idRol } = req.body;
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { idUsuario: parseInt(id) },
+    });
+
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    await prisma.rolUsuario.updateMany({
+      where: {
+        idUsuario: parseInt(id),
+        fecFin: null
+      },
+      data: {
+        fecFin: new Date(),
+        activo: false
+      }
+    });
+
+    await prisma.rolUsuario.create({
+      data: {
+        idUsuario: parseInt(id),
+        idRol,
+        idUsuarioCrea: 1, // TODO: reemplazar con el ID del usuario autenticado que modifica
+      }
+    });
+
+    res.json({ message: 'Rol actualizado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar el rol' });
+  }
+};
+
 

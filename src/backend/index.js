@@ -12,6 +12,9 @@ import passwordRoutes from './routes/passwordRoutes.js';
 import unidadRoutes from './routes/unidadRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import insumosRoutes from './routes/insumoRoutes.js';
+import roleRoutes from './routes/roleRoutes.js';
+
+
 
 
 
@@ -38,7 +41,8 @@ app.use('/api/password', passwordRoutes); // Ruta que administra reestablecimien
 app.use('/api/insumos', insumoRoutes);
 app.use('/api/unidades', unidadRoutes);
 app.use('/api/categorias', categoriaRoutes);
-app.use('/api/insumos', insumosRoutes);
+app.use('/api/roles', roleRoutes);
+
 
 
 // Iniciar servidor

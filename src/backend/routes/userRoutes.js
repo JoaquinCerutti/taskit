@@ -3,6 +3,9 @@ import { createUser, getAllUsers, getUserById } from '../controllers/userControl
 import { validateUser } from '../middlewares/validateUser.js';
 import { validationResult } from 'express-validator';
 import { updateUserById } from '../controllers/userController.js';
+import { updateRolUsuario } from '../controllers/userController.js';
+
+
 const router = Router();
 
 // GET: Todos los usuarios
@@ -23,5 +26,9 @@ router.post('/', validateUser, (req, res) => {
   }
   createUser(req, res);
 });
+
+router.put('/:id/rol', updateRolUsuario);
+
+
 
 export default router;

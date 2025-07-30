@@ -102,40 +102,37 @@ export const createUser = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany({
-      select: {
-        idUsuario: true,
-        nombre: true,
-        apellido: true,
-        emailCorporativo: true,
-        username: true,
-        activo: true,
+      include: {
         rolUsuario: {
-          select: {
-            rol: {
-              select: {
-                nombreRol: true
-              }
-            }
+          where: {
+            activo: true,
+            fecFin: null
+          },
+          include: {
+            rol: true
           }
         }
       }
     });
 
-    const usuariosFormateados = usuarios.map(user => ({
-      id: user.idUsuario,
-      nombre: `${user.nombre} ${user.apellido}`,
-      email: user.emailCorporativo,
-      username: user.username,
-      rol: user.rolUsuario[0]?.rol?.nombreRol || 'Sin rol',
-      estado: user.activo ? 'ACTIVO' : 'INACTIVO'
-    }));
+    const safeUsers = usuarios.map(u => ({
+  id: u.idUsuario,
+  nombre: `${u.nombre} ${u.apellido}`, // 👈 Agregamos apellido al nombre
+  apellido: u.apellido,                // (opcional si no lo usás)
+  email: u.emailCorporativo,
+  username: u.username,
+  estado: u.activo ? 'ACTIVO' : 'INACTIVO',
+  rol: u.rolUsuario[0]?.rol?.nombreRol || 'No asignado',
+}));
 
-    res.json(usuariosFormateados);
-  } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
+
+    res.json(safeUsers);
+  } catch (err) {
+    console.error('❌ Error al obtener usuarios:', err);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
   }
 };
+
 
 // Obtener por id
 export const getUserById = async (req, res) => {
@@ -146,29 +143,44 @@ export const getUserById = async (req, res) => {
       where: { idUsuario: parseInt(id) },
       include: {
         rolUsuario: {
-          include: { rol: true }
+          where: {
+            activo: true,
+            fecFin: null
+          },
+          include: {
+            rol: true
+          }
         }
       }
     });
 
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    const { password, verificationToken, resetToken, ...rest } = user;
+    const rolActivo = user.rolUsuario[0]?.rol;
 
-   res.json({
-  ...rest,
-  documento: rest.documento?.toString() || '',
-  rol: user.rolUsuario[0]?.rol?.nombreRol || 'Sin rol',
-  idRol: user.rolUsuario[0]?.idRol || null // <- esto es clave
-});
+    const safeUser = {
+      ...user,
+      documento: user.documento?.toString(),
+      idRol: rolActivo?.idRol || null,
+      rol: rolActivo?.nombreRol || 'No asignado',
+      rolUsuario: undefined,
+      password: undefined,
+      verificationToken: undefined,
+      verificationTokenExpires: undefined,
+      resetToken: undefined,
+      resetTokenExpires: undefined
+    };
 
-
-
+    res.json(safeUser);
   } catch (err) {
-    console.error('Error en getUserById:', err);
+    console.error('❌ Error al obtener usuario:', err);
     res.status(500).json({ error: 'Error al obtener usuario' });
   }
 };
+
+
+
+
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const {

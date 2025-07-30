@@ -2,8 +2,8 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import axios from 'axios';
-import { Lock, Eye, EyeOff } from 'lucide-react'; // 👈 Íconos importados
+import api from '@/utils/api'; // 👈 en vez de axios directo
+import { Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const token = useSearchParams().get('token');
@@ -13,17 +13,30 @@ export default function ResetPasswordPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState(false);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!token) {
+      setMessage('Token inválido o ausente');
+      setError(true);
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage('La contraseña debe tener al menos 6 caracteres');
+      setError(true);
+      return;
+    }
+
     try {
-      const res = await axios.post('http://localhost:3001/api/password/reset-password', {
+      const res = await api.post('/password/reset-password', {
         token,
         password,
       });
       setMessage(res.data.message);
       setError(false);
       setTimeout(() => router.push('/login'), 2000);
-    } catch {
+    } catch (err) {
       setMessage('Token inválido o expirado');
       setError(true);
     }

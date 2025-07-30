@@ -4,10 +4,10 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { login } from '@/services/authService';
-import { Eye, EyeOff } from 'lucide-react'; // 👈 Íconos importados
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ emailCorporativo: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
@@ -18,19 +18,23 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await login(form.email, form.password);
+      const data = await login(form.emailCorporativo, form.password);
+
+      // Guardamos token y datos del usuario en localStorage
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
       alert('Login exitoso');
-      router.push('/main');
+      router.push('/main'); // o /profile si querés ir directo al perfil
     } catch (err) {
-      alert('Credenciales inválidas');
+      const msg = err?.response?.data?.error || 'Credenciales inválidas';
+      alert(msg);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#064431] to-[#0FAA7B] flex items-center justify-center p-4 relative font-inter">
 
-      {/* Contenedor del login */}
       <div className="relative z-10 bg-white rounded-[2rem] shadow-lg p-10 w-full max-w-md text-sm">
         <div className="flex flex-col items-center mb-6">
           <Image
@@ -52,13 +56,13 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-gray-700 mb-1">
-              Usuario
+            <label htmlFor="emailCorporativo" className="block text-gray-700 mb-1">
+              Correo corporativo
             </label>
             <input
-              name="email"
+              name="emailCorporativo"
               type="email"
-              placeholder="email@domain.com"
+              placeholder="usuario@empresa.com"
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"

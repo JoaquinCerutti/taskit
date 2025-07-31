@@ -42,13 +42,16 @@ export default function ConsultarInsumosPage() {
 
  const insumosFiltrados = insumos.filter((i) => {
   const valor =
-    campoFiltro === 'unidad'
-      ? i.unidad?.descripcion || ''
-      : campoFiltro === 'categoria'
-      ? i.categoria?.nombre || ''
-      : campoFiltro === 'estado'
-      ? obtenerEstadoStock(i.cantidad).texto
-      : i[campoFiltro] || '';
+  campoFiltro === 'unidad'
+    ? i.unidad?.descripcion || ''
+    : campoFiltro === 'categoria'
+    ? i.categoria?.nombre || ''
+    : campoFiltro === 'estado'
+    ? obtenerEstadoStock(i.cantidad).texto
+    : campoFiltro === 'idInsumo'
+    ? String(i.idInsumo) // 👈 lo pasamos a string para usar `.includes()`
+    : i[campoFiltro] || '';
+
 
   return valor.toLowerCase().includes(busqueda.toLowerCase());
 });
@@ -135,6 +138,8 @@ export default function ConsultarInsumosPage() {
                 <option value="categoria">Categoría</option>
                 <option value="unidad">Unidad</option>
                 <option value="estado">Estado</option>
+                <option value="idInsumo">ID</option>
+
 
               </select>
 
@@ -154,6 +159,7 @@ export default function ConsultarInsumosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left border-b text-gray-600">
+                <th className="py-2">ID</th>
                 <th className="py-2">Nombre</th>
                 <th>Unidad</th>
                 <th>Categoría</th>
@@ -169,6 +175,7 @@ export default function ConsultarInsumosPage() {
 
                   return (
                     <tr key={insumo.idInsumo} className="border-b hover:bg-gray-50">
+                      <td className="text-gray-500">{insumo.idInsumo}</td>
                       <td>{insumo.nombre}</td>
                       <td>{insumo.unidad?.descripcion || '—'}</td>
                       <td>{insumo.categoria?.nombre || '—'}</td>
@@ -191,7 +198,7 @@ export default function ConsultarInsumosPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center py-4 text-gray-400">
+                  <td colSpan="7" className="text-center py-4 text-gray-400">
                     No se encontraron insumos.
                   </td>
                 </tr>

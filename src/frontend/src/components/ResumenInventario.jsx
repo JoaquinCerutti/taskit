@@ -1,64 +1,55 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
-  Layers, Package, DollarSign, AlertCircle
+  Layers,
+  Package,
+  DollarSign,
+  AlertCircle,
 } from 'lucide-react';
 
 export default function ResumenInventario({ insumos }) {
-  const [categorias, setCategorias] = useState([]);
+  // Calcular categorías únicas utilizadas en los insumos
+  const categoriasUnicasUsadas = Array.from(
+    new Set(insumos.map(i => i.categoria?.nombre).filter(Boolean))
+  );
 
-  useEffect(() => {
-    const fetchCategorias = async () => {
-      try {
-        const res = await axios.get('http://localhost:3001/api/categorias');
-        setCategorias(res.data);
-      } catch (error) {
-        console.error('Error al obtener categorías', error);
-      }
-    };
-
-    fetchCategorias();
-  }, []);
-
+  // Calcular métricas generales
   const totalItems = insumos.reduce((acc, i) => acc + i.cantidad, 0);
   const costoTotal = insumos.reduce((acc, i) => acc + i.cantidad * i.precioUnitario, 0);
-  const stockBajo = insumos.filter(i => i.cantidad < 10).length;
+  const stockBajo = insumos.filter(i => i.cantidad < (i.stockMinimo || 10)).length;
 
   const formatearNumero = (n) => n.toLocaleString('es-AR');
 
+  // Tarjetas resumen
   const tarjetas = [
     {
       titulo: 'Categorías',
-      valor: categorias.length,
+      valor: categoriasUnicasUsadas.length,
       icono: <Layers className="text-blue-500" />,
-      fondo: 'bg-blue-100'
+      fondo: 'bg-blue-100',
     },
     {
       titulo: 'Items totales',
       valor: formatearNumero(totalItems),
       icono: <Package className="text-green-600" />,
-      fondo: 'bg-green-100'
+      fondo: 'bg-green-100',
     },
     {
       titulo: 'Costo total',
       valor: `$${formatearNumero(costoTotal)}`,
       icono: <DollarSign className="text-purple-600" />,
-      fondo: 'bg-purple-100'
+      fondo: 'bg-purple-100',
     },
     {
       titulo: 'Productos con stock bajo',
       valor: stockBajo,
       icono: <AlertCircle className="text-yellow-600" />,
-      fondo: 'bg-yellow-100'
-    }
+      fondo: 'bg-yellow-100',
+    },
   ];
 
   return (
     <div className="mb-8">
- 
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {tarjetas.map((t, idx) => (
           <div

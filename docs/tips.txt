@@ -4,4 +4,4 @@
 
 - Se debe registrar el proveedor de los artículos
 
-- 
+- Agregar jardineria como categoria de insumo

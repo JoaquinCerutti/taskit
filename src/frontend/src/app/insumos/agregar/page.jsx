@@ -17,6 +17,9 @@ export default function AgregarInsumoPage() {
   const [unidades, setUnidades] = useState([]);
   const [error, setError] = useState('');
   const [stockMinimo, setStockMinimo] = useState('');
+  const [nuevaCategoria, setNuevaCategoria] = useState('');
+  const [creandoCategoria, setCreandoCategoria] = useState(false);
+
 
 
   const costoTotal = cantidad && precioUnitario ? (cantidad * precioUnitario).toFixed(2) : '';
@@ -161,8 +164,45 @@ export default function AgregarInsumoPage() {
                   </option>
                 ))}
               </select>
+              <div className="mt-3 flex gap-3">
+  <input
+    type="text"
+    className="flex-1 border px-3 py-2 rounded text-sm"
+    placeholder="Nueva categoría"
+    value={nuevaCategoria}
+    onChange={(e) => setNuevaCategoria(e.target.value)}
+  />
+  <button
+    type="button"
+    disabled={creandoCategoria || !nuevaCategoria.trim()}
+    onClick={async () => {
+      try {
+        setCreandoCategoria(true);
+        const res = await axios.post('http://localhost:3001/api/categorias', {
+          nombre: nuevaCategoria.trim(),
+        });
+
+        setCategorias((prev) => [...prev, res.data]);
+        setIdCategoria(res.data.idCategoria);
+        setNuevaCategoria('');
+      } catch (error) {
+        console.error('Error al crear categoría:', error);
+        alert('Error al crear categoría');
+      } finally {
+        setCreandoCategoria(false);
+      }
+    }}
+    className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Agregar
+  </button>
+</div>
+
             </div>
             
+            
+
+
             <div>
               <label className="block font-medium mb-1">Stock mínimo</label>
               <input

@@ -205,6 +205,7 @@ model Insumo {
   precioUnitario Float             @default(0)                   @map("precio_unitario")
   descripcion    String?           @map("descripcion")
   stockMinimo    Int @default(0)   @map("stock_minimo")
+  activo         Boolean  @default(true)                @map("activo")
 
 
   unidad         Unidades          @relation("UnidadInsumos", fields: [idUnidad], references: [idUnidad])

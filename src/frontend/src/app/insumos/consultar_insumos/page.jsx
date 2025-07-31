@@ -171,12 +171,19 @@ export default function ConsultarInsumosPage() {
             <tbody>
               {insumosPaginados.length > 0 ? (
                 insumosPaginados.map((insumo) => {
-                  const estado = obtenerEstadoStock(insumo.cantidad, insumo.stockMinimo || 10);
+                  const estado = !insumo.activo
+  ? { texto: 'Inactivo', clase: 'bg-gray-300 text-gray-700' }
+  : obtenerEstadoStock(insumo.cantidad, insumo.stockMinimo || 10);
+
 
                   return (
                     <tr key={insumo.idInsumo} className="border-b hover:bg-gray-50">
                       <td className="text-gray-500">{insumo.idInsumo}</td>
-                      <td>{insumo.nombre}</td>
+                      <td>
+                        <span className={insumo.activo ? '' : 'line-through text-red-600'}>
+                          {insumo.nombre}
+                        </span>
+                      </td>
                       <td>{insumo.unidad?.descripcion || '—'}</td>
                       <td>{insumo.categoria?.nombre || '—'}</td>
                       <td>{insumo.cantidad}</td>

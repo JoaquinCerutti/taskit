@@ -1,7 +1,0 @@
-- Los productos codificarlos
-
-- Stock mínimo agregarlo como atributo en la BD
-
-- Se debe registrar el proveedor de los artículos
-
-- Agregar jardineria como categoria de insumo

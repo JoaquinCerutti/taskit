@@ -119,3 +119,36 @@ export const deleteInsumo = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar insumo' });
   }
 };
+
+// Dar de baja (marcar como inactivo) un insumo
+export const darDeBajaInsumo = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    const insumo = await prisma.insumo.update({
+      where: { idInsumo: id },
+      data: { activo: false },
+    });
+
+    res.json({ mensaje: 'Insumo dado de baja correctamente', insumo });
+  } catch (error) {
+    console.error('Error al dar de baja insumo:', error);
+    res.status(500).json({ error: 'Error al dar de baja el insumo' });
+  }
+};
+
+export const darDeAltaInsumo = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+
+    const insumo = await prisma.insumo.update({
+      where: { idInsumo: id },
+      data: { activo: true },
+    });
+
+    res.json({ mensaje: 'Insumo dado de alta correctamente', insumo });
+  } catch (error) {
+    console.error('Error al dar de alta insumo:', error);
+    res.status(500).json({ error: 'Error al dar de alta el insumo' });
+  }
+};

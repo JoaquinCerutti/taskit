@@ -8,6 +8,8 @@ import dynamic from 'next/dynamic';
 import ResumenInventario from '@/components/ResumenInventario';
 
 
+
+
 const UserHeader = dynamic(() => import('@/components/UserHeader'), { ssr: false });
 
 export default function ConsultarInsumosPage() {
@@ -16,6 +18,9 @@ export default function ConsultarInsumosPage() {
   const [campoFiltro, setCampoFiltro] = useState('nombre');
   const [paginaActual, setPaginaActual] = useState(1);
   const [filasPorPagina, setFilasPorPagina] = useState(5);
+  const [ordenCampo, setOrdenCampo] = useState(null); // nombre, cantidad, etc.
+  const [ordenDireccion, setOrdenDireccion] = useState('asc'); // asc o desc
+
 
   const router = useRouter();
 
@@ -32,12 +37,22 @@ export default function ConsultarInsumosPage() {
     fetchInsumos();
   }, []);
 
+  const manejarOrden = (campo) => {
+  if (ordenCampo === campo) {
+    setOrdenDireccion((prev) => (prev === 'asc' ? 'desc' : 'asc')); // alterna
+  } else {
+    setOrdenCampo(campo);
+    setOrdenDireccion('asc'); // empieza ascendente
+  }
+};
+
 
    const obtenerEstadoStock = (cantidad, stockMinimo) => {
   if (cantidad === 0) return { texto: 'Agotado', clase: 'bg-red-200 text-red-800' };
   if (cantidad < stockMinimo) return { texto: 'Stock bajo', clase: 'bg-yellow-200 text-yellow-800' };
   return { texto: 'En stock', clase: 'bg-green-200 text-green-800' };
 };
+
 
 
  const insumosFiltrados = insumos.filter((i) => {
@@ -56,10 +71,40 @@ export default function ConsultarInsumosPage() {
   return valor.toLowerCase().includes(busqueda.toLowerCase());
 });
 
+const insumosOrdenados = [...insumosFiltrados].sort((a, b) => {
+  if (!ordenCampo) return 0;
+
+  let aValor = a[ordenCampo];
+  let bValor = b[ordenCampo];
+
+  // Para campos especiales como unidad, categoría o estado
+  if (ordenCampo === 'unidad') {
+    aValor = a.unidad?.descripcion || '';
+    bValor = b.unidad?.descripcion || '';
+  } else if (ordenCampo === 'categoria') {
+    aValor = a.categoria?.nombre || '';
+    bValor = b.categoria?.nombre || '';
+  } else if (ordenCampo === 'estado') {
+    aValor = obtenerEstadoStock(a.cantidad, a.stockMinimo || 10).texto;
+    bValor = obtenerEstadoStock(b.cantidad, b.stockMinimo || 10).texto;
+  }
+
+  // Para evitar errores al comparar texto o número
+  if (typeof aValor === 'string') {
+    aValor = aValor.toLowerCase();
+    bValor = bValor.toLowerCase();
+  }
+
+  if (aValor < bValor) return ordenDireccion === 'asc' ? -1 : 1;
+  if (aValor > bValor) return ordenDireccion === 'asc' ? 1 : -1;
+  return 0;
+});
+
+
 
   const indiceInicio = (paginaActual - 1) * filasPorPagina;
   const indiceFin = indiceInicio + filasPorPagina;
-  const insumosPaginados = insumosFiltrados.slice(indiceInicio, indiceFin);
+  const insumosPaginados = insumosOrdenados.slice(indiceInicio, indiceFin);
   const totalPaginas = Math.ceil(insumosFiltrados.length / filasPorPagina);
 
  
@@ -157,17 +202,33 @@ export default function ConsultarInsumosPage() {
           </div>
 
           <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b text-gray-600">
-                <th className="py-2">ID</th>
-                <th className="py-2">Nombre</th>
-                <th>Unidad</th>
-                <th>Categoría</th>
-                <th>Cantidad</th>
-                <th>Estado</th>
-                <th>Detalle</th>
-              </tr>
-            </thead>
+           
+
+              <thead>
+  <tr className="text-left border-b text-gray-600">
+    <th className="py-2 cursor-pointer" onClick={() => manejarOrden('idInsumo')}>
+      ID {ordenCampo === 'idInsumo' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="py-2 cursor-pointer" onClick={() => manejarOrden('nombre')}>
+      Nombre {ordenCampo === 'nombre' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('unidad')}>
+      Unidad {ordenCampo === 'unidad' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('categoria')}>
+      Categoría {ordenCampo === 'categoria' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('cantidad')}>
+      Cantidad {ordenCampo === 'cantidad' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('estado')}>
+      Estado {ordenCampo === 'estado' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th>Detalle</th>
+  </tr>
+</thead>
+
+            
             <tbody>
               {insumosPaginados.length > 0 ? (
                 insumosPaginados.map((insumo) => {

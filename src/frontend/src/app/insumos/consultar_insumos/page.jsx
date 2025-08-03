@@ -142,6 +142,13 @@ const insumosOrdenados = [...insumosFiltrados].sort((a, b) => {
             >
               Agregar insumo
             </button>
+            <button
+  onClick={() => router.push('/insumos/carga_masiva')}
+  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
+>
+  Carga Masiva
+</button>
+
             <UserHeader />
           </div>
         </div>

@@ -152,3 +152,72 @@ export const darDeAltaInsumo = async (req, res) => {
     res.status(500).json({ error: 'Error al dar de alta el insumo' });
   }
 };
+
+export const actualizarStockMasivo = async (req, res) => {
+ console.log('Body recibido:', JSON.stringify(req.body, null, 2));
+  const { cambios } = req.body;
+ 
+  // Validación básica del contenedor
+  if (!Array.isArray(cambios) || cambios.length === 0) {
+    return res.status(400).json({ error: 'El body debe ser { cambios: [{ idInsumo, cantidad }, ...] } y no puede estar vacío.' });
+  }
+
+  // Normalizamos y validamos cada ítem
+  const normalizados = cambios.map((c, idx) => {
+    const id = Number(c?.idInsumo);
+    const qty = Number(c?.cantidad);
+    return { idx, idInsumo: id, cantidad: qty };
+  });
+
+  const invalidos = normalizados.filter(x =>
+    !Number.isInteger(x.idInsumo) || !Number.isFinite(x.cantidad) || x.cantidad <= 0
+  );
+
+  if (invalidos.length > 0) {
+    return res.status(400).json({
+      error: 'Datos inválidos en uno o más elementos.',
+      detalle: invalidos.map(x => ({
+        index: x.idx,
+        idInsumo: x.idInsumo,
+        cantidad: x.cantidad,
+        motivo: 'idInsumo debe ser entero y cantidad debe ser > 0'
+      }))
+    });
+  }
+
+  try {
+    // Verificamos existencia/activo de todos los insumos primero
+    const ids = normalizados.map(x => x.idInsumo);
+    const existentes = await prisma.insumo.findMany({
+      where: { idInsumo: { in: ids } },
+      select: { idInsumo: true, activo: true }
+    });
+
+    const mapa = new Map(existentes.map(i => [i.idInsumo, i]));
+    const faltantes = normalizados.filter(x => !mapa.has(x.idInsumo));
+    const inactivos = normalizados.filter(x => mapa.get(x.idInsumo) && !mapa.get(x.idInsumo).activo);
+
+    if (faltantes.length || inactivos.length) {
+      return res.status(400).json({
+        error: 'Algunos insumos no existen o están inactivos.',
+        faltantes: faltantes.map(f => f.idInsumo),
+        inactivos: inactivos.map(i => i.idInsumo),
+      });
+    }
+
+    // Actualizamos en transacción usando increment
+    const operaciones = normalizados.map(x =>
+      prisma.insumo.update({
+        where: { idInsumo: x.idInsumo },
+        data: { cantidad: { increment: x.cantidad } }
+      })
+    );
+
+    const resultados = await prisma.$transaction(operaciones);
+
+    return res.status(200).json({ mensaje: 'Stock actualizado', resultados });
+  } catch (error) {
+    console.error('Error al actualizar stock masivo:', error);
+    return res.status(500).json({ error: 'Error al procesar la actualización masiva' });
+  }
+};

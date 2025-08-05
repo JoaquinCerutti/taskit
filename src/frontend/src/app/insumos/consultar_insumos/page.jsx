@@ -26,13 +26,18 @@ export default function ConsultarInsumosPage() {
 
   useEffect(() => {
     const fetchInsumos = async () => {
-      try {
-        const res = await axios.get('http://localhost:3001/api/insumos');
-        setInsumos(res.data);
-      } catch (err) {
-        console.error('Error al obtener insumos:', err);
-      }
-    };
+  try {
+    const token = localStorage.getItem('token');
+    const res = await axios.get('http://localhost:3001/api/insumos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setInsumos(res.data);
+  } catch (err) {
+    console.error('Error al obtener insumos:', err);
+  }
+};
 
     fetchInsumos();
   }, []);
@@ -136,21 +141,24 @@ const insumosOrdenados = [...insumosFiltrados].sort((a, b) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/insumos/agregar')}
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
-            >
-              Agregar insumo
-            </button>
-            <button
-  onClick={() => router.push('/insumos/carga_masiva')}
-  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
->
-  Carga Masiva
-</button>
+  <button
+    onClick={() => router.push('/insumos/agregar')}
+    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
+  >
+    Agregar insumo
+  </button>
+  <button
+    onClick={() => router.push('/insumos/carga_masiva')}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
+  >
+    Carga Masiva
+  </button>
 
-            <UserHeader />
-          </div>
+  
+
+  <UserHeader />
+</div>
+
         </div>
 
         <ResumenInventario insumos={insumos} />

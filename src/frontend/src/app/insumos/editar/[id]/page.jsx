@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation'; // ⬅️ Asegurate de importar useParams
 import axios from 'axios';
 
-export default function EditarInsumoPage({ params }) {
+export default function EditarInsumoPage() {
   const router = useRouter();
-  const id = params.id;
+  const params = useParams();         // ⬅️ useParams devuelve un objeto
+  const id = params?.id;              // ⬅️ Extraemos el ID así
 
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState('');
@@ -22,11 +23,11 @@ export default function EditarInsumoPage({ params }) {
   const [creandoCategoria, setCreandoCategoria] = useState(false);
   const [insumo, setInsumo] = useState(null);
 
-
   const costoTotal =
     cantidad && precioUnitario ? (cantidad * precioUnitario).toFixed(2) : '';
 
   useEffect(() => {
+    if (!id) return; // espera a tener el id
     const fetchData = async () => {
       try {
         const [insumoRes, catRes, uniRes] = await Promise.all([
@@ -37,15 +38,15 @@ export default function EditarInsumoPage({ params }) {
 
         const insumo = insumoRes.data;
         setInsumo(insumo);
-        setNombre(insumo.nombre);
-        setCantidad(insumo.cantidad);
-        setPrecioUnitario(insumo.precioUnitario);
+        setNombre(insumo.nombre ?? '');
+        setCantidad(insumo.cantidad ?? '');
+        setPrecioUnitario(insumo.precioUnitario ?? '');
         setDescripcion(insumo.descripcion || '');
         setIdUnidad(insumo.unidad?.idUnidad?.toString() || '');
         setIdCategoria(insumo.categoria?.idCategoria?.toString() || '');
         setStockMinimo(insumo.stockMinimo?.toString() || '');
-        setCategorias(catRes.data);
-        setUnidades(uniRes.data);
+        setCategorias(catRes.data || []);
+        setUnidades(uniRes.data || []);
       } catch (err) {
         console.error('Error al cargar datos:', err);
       }
@@ -57,7 +58,6 @@ export default function EditarInsumoPage({ params }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     try {
       await axios.put(`http://localhost:3001/api/insumos/${id}`, {
         nombre,
@@ -75,26 +75,24 @@ export default function EditarInsumoPage({ params }) {
     }
   };
 
-const toggleEstadoInsumo = async () => {
-  const accion = insumo?.activo ? 'dar-de-baja' : 'dar-de-alta';
-  const confirmar = confirm(
-    insumo?.activo
-      ? '¿Estás seguro de que querés dar de baja este producto?'
-      : '¿Estás seguro de que querés reactivar este producto?'
-  );
-  if (!confirmar) return;
+  const toggleEstadoInsumo = async () => {
+    const accion = insumo?.activo ? 'dar-de-baja' : 'dar-de-alta';
+    const confirmar = confirm(
+      insumo?.activo
+        ? '¿Estás seguro de que querés dar de baja este producto?'
+        : '¿Estás seguro de que querés reactivar este producto?'
+    );
+    if (!confirmar) return;
 
-  try {
-    const res = await axios.patch(`http://localhost:3001/api/insumos/${id}/${accion}`);
-    alert(res.data.mensaje);
-    router.push('/insumos/consultar_insumos'); // 👈 redirección después del éxito
-  } catch (error) {
-    console.error('Error al cambiar estado del producto:', error);
-    alert('Ocurrió un error al intentar cambiar el estado del producto.');
-  }
-};
-
-
+    try {
+      const res = await axios.patch(`http://localhost:3001/api/insumos/${id}/${accion}`);
+      alert(res.data.mensaje);
+      router.push('/insumos/consultar_insumos');
+    } catch (error) {
+      console.error('Error al cambiar estado del producto:', error);
+      alert('Ocurrió un error al intentar cambiar el estado del producto.');
+    }
+  };
 
   return (
     <div className="p-8 font-inter">
@@ -109,19 +107,16 @@ const toggleEstadoInsumo = async () => {
 
       <div className="bg-white shadow-md rounded-xl p-8">
         <h2 className="text-xl font-semibold mb-6">Detalle del producto</h2>
-        {!insumo?.activo && (
-  <div className="mb-4 p-3 rounded bg-yellow-100 text-yellow-800 text-sm font-medium">
-    Este producto está <strong>dado de baja</strong>.
-  </div>
-)}
 
+        {!insumo?.activo && (
+          <div className="mb-4 p-3 rounded bg-yellow-100 text-yellow-800 text-sm font-medium">
+            Este producto está <strong>dado de baja</strong>.
+          </div>
+        )}
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm"
-        >
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
           <div>
             <label className="font-medium mb-1 block">Nombre de producto</label>
             <input
@@ -135,7 +130,7 @@ const toggleEstadoInsumo = async () => {
             <label className="font-medium mb-1 block">ID producto</label>
             <input
               disabled
-              value={id}
+              value={id || ''}
               className="w-full border px-3 py-2 rounded bg-gray-100 text-gray-600"
             />
           </div>
@@ -156,6 +151,7 @@ const toggleEstadoInsumo = async () => {
             <input
               type="number"
               min="0"
+              step="0.01"
               value={precioUnitario}
               onChange={(e) => setPrecioUnitario(e.target.value)}
               className="w-full border px-3 py-2 rounded"
@@ -216,11 +212,9 @@ const toggleEstadoInsumo = async () => {
                 onClick={async () => {
                   try {
                     setCreandoCategoria(true);
-                    const res = await axios.post(
-                      'http://localhost:3001/api/categorias',
-                      { nombre: nuevaCategoria.trim() }
-                    );
-
+                    const res = await axios.post('http://localhost:3001/api/categorias', {
+                      nombre: nuevaCategoria.trim(),
+                    });
                     setCategorias((prev) => [...prev, res.data]);
                     setIdCategoria(res.data.idCategoria);
                     setNuevaCategoria('');
@@ -270,7 +264,6 @@ const toggleEstadoInsumo = async () => {
             >
               {insumo?.activo ? 'Dar de baja' : 'Dar de alta'}
             </button>
-
 
             <button
               type="submit"

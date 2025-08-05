@@ -1,12 +1,15 @@
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const prisma = new PrismaClient();
+const SECRET_KEY = process.env.JWT_SECRET;
 
 // Crear insumo
 export const createInsumo = async (req, res) => {
   try {
     const { nombre, cantidad, precioUnitario, idUnidad, idCategoria, stockMinimo } = req.body;
-
 
     const nuevoInsumo = await prisma.insumo.create({
       data: {
@@ -20,7 +23,6 @@ export const createInsumo = async (req, res) => {
           connect: { idCategoria },
         },
         stockMinimo: parseInt(stockMinimo) || 0,
-
       },
     });
 
@@ -34,15 +36,68 @@ export const createInsumo = async (req, res) => {
 // Obtener todos los insumos
 export const getInsumos = async (req, res) => {
   try {
+    let usuarioId = undefined;
+
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+        usuarioId = decoded.idUsuario;
+        console.log('🧪 ID usuario:', usuarioId);
+      } catch (err) {
+        console.warn('🧪 Token inválido (se continúa sin generar notificaciones)');
+      }
+    }
+
     const insumos = await prisma.insumo.findMany({
       include: {
         unidad: true,
         categoria: true,
       },
     });
+
+    // Filtrar insumos con stock bajo (activos)
+    const insumosBajoStock = insumos.filter(
+      (i) => i.activo && i.cantidad < (i.stockMinimo || 0)
+    );
+
+    // 🔎 LOG PARA DEBUG
+    console.log('🧪 Insumos con stock bajo:', insumosBajoStock.map(i => ({
+      nombre: i.nombre,
+      cantidad: i.cantidad,
+      stockMinimo: i.stockMinimo
+    })));
+
+    if (usuarioId) {
+      for (const insumo of insumosBajoStock) {
+        const mensaje = `El insumo "${insumo.nombre}" tiene stock bajo`;
+
+        const existe = await prisma.notificacion.findFirst({
+          where: {
+            idUsuario: usuarioId,
+            mensaje,
+            leido: false,
+          },
+        });
+
+        if (!existe) {
+          await prisma.notificacion.create({
+            data: {
+              mensaje,
+              idUsuario: usuarioId,
+            },
+          });
+          console.log(`✅ Notificación creada para: ${mensaje}`);
+        } else {
+          console.log(`ℹ️ Ya existe notificación: ${mensaje}`);
+        }
+      }
+    }
+
     res.json(insumos);
   } catch (error) {
-    console.error('Error al obtener insumos:', error);
+    console.error('❌ Error al obtener insumos:', error);
     res.status(500).json({ error: 'Error al obtener insumos' });
   }
 };
@@ -76,7 +131,6 @@ export const updateInsumo = async (req, res) => {
     const id = parseInt(req.params.id);
     const { nombre, cantidad, precioUnitario, descripcion, idUnidad, idCategoria, stockMinimo } = req.body;
 
-
     if (!idUnidad || !idCategoria) {
       return res.status(400).json({ error: 'Unidad y Categoría son obligatorias' });
     }
@@ -95,7 +149,6 @@ export const updateInsumo = async (req, res) => {
           connect: { idCategoria },
         },
         stockMinimo: parseInt(stockMinimo) || 0,
-
       },
     });
 
@@ -154,15 +207,13 @@ export const darDeAltaInsumo = async (req, res) => {
 };
 
 export const actualizarStockMasivo = async (req, res) => {
- console.log('Body recibido:', JSON.stringify(req.body, null, 2));
+  console.log('Body recibido:', JSON.stringify(req.body, null, 2));
   const { cambios } = req.body;
- 
-  // Validación básica del contenedor
+
   if (!Array.isArray(cambios) || cambios.length === 0) {
     return res.status(400).json({ error: 'El body debe ser { cambios: [{ idInsumo, cantidad }, ...] } y no puede estar vacío.' });
   }
 
-  // Normalizamos y validamos cada ítem
   const normalizados = cambios.map((c, idx) => {
     const id = Number(c?.idInsumo);
     const qty = Number(c?.cantidad);
@@ -186,7 +237,6 @@ export const actualizarStockMasivo = async (req, res) => {
   }
 
   try {
-    // Verificamos existencia/activo de todos los insumos primero
     const ids = normalizados.map(x => x.idInsumo);
     const existentes = await prisma.insumo.findMany({
       where: { idInsumo: { in: ids } },
@@ -205,7 +255,6 @@ export const actualizarStockMasivo = async (req, res) => {
       });
     }
 
-    // Actualizamos en transacción usando increment
     const operaciones = normalizados.map(x =>
       prisma.insumo.update({
         where: { idInsumo: x.idInsumo },

@@ -1,4 +1,6 @@
 import express from 'express';
+import { verifyToken } from '../middlewares/authMiddleware.js';
+
 import {
   createInsumo,
   getInsumos,
@@ -13,7 +15,7 @@ import {
 const router = express.Router();
 
 router.post('/', createInsumo);
-router.get('/', getInsumos);
+
 
 router.delete('/:id', deleteInsumo);
 router.patch('/:id/dar-de-baja', darDeBajaInsumo);
@@ -21,6 +23,8 @@ router.patch('/:id/dar-de-alta', darDeAltaInsumo);
 router.put('/actualizar-stock-masivo', actualizarStockMasivo);
 router.put('/:id', updateInsumo);
 router.get('/:id', getInsumoById); 
+router.get('/', getInsumos);
+
 
 
 export default router;

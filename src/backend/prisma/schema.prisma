@@ -25,7 +25,7 @@ model CategoriaInsumo {
 /// Roles de usuario
 model Role {
   idRol     Int    @id @default(autoincrement()) @map("id_rol")
-  nombreRol String @map("nombre_rol")
+  nombreRol String @unique @map("nombre_rol")
 
   sesiones   Sesion[]     @relation("RoleSesiones")
   rolUsuario RolUsuario[] @relation("RoleRolUsuario")

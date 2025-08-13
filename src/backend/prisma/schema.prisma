@@ -148,6 +148,7 @@ model Ticket {
   asignado       Usuario?          @relation("TicketsAsignado", fields: [idUsuarioAsignado], references: [idUsuario])
   modificador    Usuario?          @relation("TicketsModificado", fields: [idUsuarioModificacion], references: [idUsuario])
   prioridad      PrioridadesTicket @relation("PrioridadTickets", fields: [idPrioridad], references: [idPrioridad])
+  tipoTicket    TipoTicket?       @relation("TipoTicketTickets", fields: [idTipoTicket], references: [idTipoTicket])
   historiales    HistorialTicket[] @relation("TicketHistoriales")
   mensajes       MensajeTicket[]   @relation("TicketMensajes")
   insumosXTicket InsumosXTicket[]  @relation("TicketInsumosXTicket")
@@ -297,4 +298,13 @@ model Archivo {
   tipoArchivo TipoArchivo @relation("TipoArchivoArchivos", fields: [idTipoArchivo], references: [idTipoArchivo])
 
   @@map("archivos")
+}
+
+model TipoTicket {
+  idTipoTicket Int      @id @default(autoincrement()) @map("id_tipo_ticket")
+  nombre       String   @unique
+  descripcion  String?
+  tickets      Ticket[] @relation("TipoTicketTickets")
+
+  @@map("tipos_ticket")
 }

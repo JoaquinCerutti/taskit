@@ -24,7 +24,7 @@ export default function LoginPage() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      alert('Login exitoso');
+      //alert('Login exitoso');
       router.push('/main'); // o /profile si querés ir directo al perfil
     } catch (err) {
       const msg = err?.response?.data?.error || 'Credenciales inválidas';

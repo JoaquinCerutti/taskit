@@ -29,7 +29,7 @@ export default function ResumenInventario({ insumos }) {
       fondo: 'bg-blue-100',
     },
     {
-      titulo: 'Items totales',
+      titulo: 'Insumos totales',
       valor: formatearNumero(totalItems),
       icono: <Package className="text-green-600" />,
       fondo: 'bg-green-100',
@@ -41,7 +41,7 @@ export default function ResumenInventario({ insumos }) {
       fondo: 'bg-purple-100',
     },
     {
-      titulo: 'Productos con stock bajo',
+      titulo: 'Insumos con stock bajo',
       valor: stockBajo,
       icono: <AlertCircle className="text-yellow-600" />,
       fondo: 'bg-yellow-100',

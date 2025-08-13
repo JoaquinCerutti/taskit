@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+
 // Obtener roles
 export const getRoles = async (req, res) => {
   try {

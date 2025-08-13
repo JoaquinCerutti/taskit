@@ -6,6 +6,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET;
 
+
 // Crear insumo
 export const createInsumo = async (req, res) => {
   try {
@@ -32,6 +33,7 @@ export const createInsumo = async (req, res) => {
     res.status(500).json({ error: 'Error al crear insumo' });
   }
 };
+
 
 // Obtener todos los insumos
 export const getInsumos = async (req, res) => {
@@ -102,6 +104,7 @@ export const getInsumos = async (req, res) => {
   }
 };
 
+
 // Obtener insumo por ID (para editar)
 export const getInsumoById = async (req, res) => {
   try {
@@ -124,6 +127,7 @@ export const getInsumoById = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener insumo' });
   }
 };
+
 
 // Actualizar insumo
 export const updateInsumo = async (req, res) => {
@@ -159,6 +163,7 @@ export const updateInsumo = async (req, res) => {
   }
 };
 
+
 // Eliminar insumo (opcional o para dar de baja)
 export const deleteInsumo = async (req, res) => {
   try {
@@ -172,6 +177,7 @@ export const deleteInsumo = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar insumo' });
   }
 };
+
 
 // Dar de baja (marcar como inactivo) un insumo
 export const darDeBajaInsumo = async (req, res) => {
@@ -190,6 +196,7 @@ export const darDeBajaInsumo = async (req, res) => {
   }
 };
 
+
 export const darDeAltaInsumo = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -205,6 +212,7 @@ export const darDeAltaInsumo = async (req, res) => {
     res.status(500).json({ error: 'Error al dar de alta el insumo' });
   }
 };
+
 
 export const actualizarStockMasivo = async (req, res) => {
   console.log('Body recibido:', JSON.stringify(req.body, null, 2));

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+
 // Obtener todas las categorías
 export const getCategorias = async (req, res) => {
   try {
@@ -13,6 +14,7 @@ export const getCategorias = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener categorías' });
   }
 };
+
 
 // Crear nueva categoría
 export const createCategoria = async (req, res) => {

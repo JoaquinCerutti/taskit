@@ -179,8 +179,6 @@ export const getUserById = async (req, res) => {
 };
 
 
-
-
 export const updateUserById = async (req, res) => {
   const { id } = req.params;
   const {
@@ -265,8 +263,6 @@ export const updateUserById = async (req, res) => {
 };
 
 
-
-
 export const updateRolUsuario = async (req, res) => {
   const { id } = req.params;
   const { idRol } = req.body;
@@ -303,5 +299,4 @@ export const updateRolUsuario = async (req, res) => {
     res.status(500).json({ message: 'Error al actualizar el rol' });
   }
 };
-
 

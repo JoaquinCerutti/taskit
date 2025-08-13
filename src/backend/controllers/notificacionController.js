@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+
 // Obtener notificaciones del usuario logueado
 export const getNotificacionesUsuario = async (req, res) => {
   try {
@@ -19,6 +20,7 @@ export const getNotificacionesUsuario = async (req, res) => {
   }
 };
 
+
 // Marcar notificación como leída
 export const marcarComoLeida = async (req, res) => {
   try {
@@ -35,6 +37,7 @@ export const marcarComoLeida = async (req, res) => {
     res.status(500).json({ error: 'Error al actualizar notificación' });
   }
 };
+
 
 // Marcar todas como leídas (opcional)
 export const marcarTodasComoLeidas = async (req, res) => {

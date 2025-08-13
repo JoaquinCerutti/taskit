@@ -16,6 +16,11 @@ export default function AgregarInsumoPage() {
   const [categorias, setCategorias] = useState([]);
   const [unidades, setUnidades] = useState([]);
   const [error, setError] = useState('');
+  const [stockMinimo, setStockMinimo] = useState('');
+  const [nuevaCategoria, setNuevaCategoria] = useState('');
+  const [creandoCategoria, setCreandoCategoria] = useState(false);
+
+
 
   const costoTotal = cantidad && precioUnitario ? (cantidad * precioUnitario).toFixed(2) : '';
 
@@ -41,9 +46,10 @@ export default function AgregarInsumoPage() {
     e.preventDefault();
     setError('');
 
-    if (!nombre || !cantidad || !precioUnitario || !idUnidad || !idCategoria) {
-      return setError('Todos los campos son obligatorios');
-    }
+   if (!nombre || !cantidad || !precioUnitario || !idUnidad || !idCategoria || stockMinimo === '') {
+  return setError('Todos los campos son obligatorios');
+}
+
 
     try {
       await axios.post('http://localhost:3001/api/insumos', {
@@ -52,6 +58,7 @@ export default function AgregarInsumoPage() {
         precioUnitario: parseFloat(precioUnitario),
         idUnidad: parseInt(idUnidad),
         idCategoria: parseInt(idCategoria),
+        stockMinimo: parseInt(stockMinimo),
       });
       router.push('/insumos/consultar_insumos');
     } catch (err) {
@@ -80,20 +87,20 @@ export default function AgregarInsumoPage() {
       {/* Main content */}
       <main className="flex-1 p-10">
         <h1 className="text-2xl font-bold mb-1">Nuevo Item</h1>
-        <p className="text-sm text-gray-500 mb-6">Ingrese los datos para crear un nuevo item</p>
+        <p className="text-sm text-gray-500 mb-6">Ingrese los datos para crear un nuevo insumo</p>
 
         <button onClick={() => router.back()} className="text-green-700 text-sm mb-6 flex items-center">
           &larr; Volver
         </button>
 
         <div className="bg-white shadow rounded-xl p-8">
-          <h2 className="text-lg font-semibold mb-4">Añadir un nuevo producto</h2>
+          <h2 className="text-lg font-semibold mb-4">Añadir un nuevo insumo</h2>
 
           {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
             <div>
-              <label className="block font-medium mb-1">Nombre de producto</label>
+              <label className="block font-medium mb-1">Nombre de insumo</label>
               <input
                 type="text"
                 className="w-full border px-3 py-2 rounded"
@@ -157,6 +164,55 @@ export default function AgregarInsumoPage() {
                   </option>
                 ))}
               </select>
+              <div className="mt-3 flex gap-3">
+  <input
+    type="text"
+    className="flex-1 border px-3 py-2 rounded text-sm"
+    placeholder="Nueva categoría"
+    value={nuevaCategoria}
+    onChange={(e) => setNuevaCategoria(e.target.value)}
+  />
+  <button
+    type="button"
+    disabled={creandoCategoria || !nuevaCategoria.trim()}
+    onClick={async () => {
+      try {
+        setCreandoCategoria(true);
+        const res = await axios.post('http://localhost:3001/api/categorias', {
+          nombre: nuevaCategoria.trim(),
+        });
+
+        setCategorias((prev) => [...prev, res.data]);
+        setIdCategoria(res.data.idCategoria);
+        setNuevaCategoria('');
+      } catch (error) {
+        console.error('Error al crear categoría:', error);
+        alert('Error al crear categoría');
+      } finally {
+        setCreandoCategoria(false);
+      }
+    }}
+    className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Agregar
+  </button>
+</div>
+
+            </div>
+            
+            
+
+
+            <div>
+              <label className="block font-medium mb-1">Stock mínimo</label>
+              <input
+                type="number"
+                min="0"
+                className="w-full border px-3 py-2 rounded"
+                placeholder="Cantidad mínima antes de reponer"
+                value={stockMinimo}
+                onChange={(e) => setStockMinimo(e.target.value)}
+              />
             </div>
 
             <div>
@@ -180,7 +236,7 @@ export default function AgregarInsumoPage() {
                 type="submit"
                 className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded"
               >
-                Agregar Item
+                Agregar Insumo
               </button>
             </div>
           </form>

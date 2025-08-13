@@ -4,35 +4,115 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import axios from 'axios';
-import UserHeader from '@/components/UserHeader';
+import dynamic from 'next/dynamic';
+import ResumenInventario from '@/components/ResumenInventario';
+
+
+
+
+const UserHeader = dynamic(() => import('@/components/UserHeader'), { ssr: false });
 
 export default function ConsultarInsumosPage() {
   const [insumos, setInsumos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
+  const [campoFiltro, setCampoFiltro] = useState('nombre');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [filasPorPagina, setFilasPorPagina] = useState(5);
+  const [ordenCampo, setOrdenCampo] = useState(null); // nombre, cantidad, etc.
+  const [ordenDireccion, setOrdenDireccion] = useState('asc'); // asc o desc
+
+
   const router = useRouter();
 
   useEffect(() => {
     const fetchInsumos = async () => {
-      try {
-        const res = await axios.get('http://localhost:3001/api/insumos');
-        setInsumos(res.data);
-      } catch (err) {
-        console.error('Error al obtener insumos:', err);
-      }
-    };
+  try {
+    const token = localStorage.getItem('token');
+    const res = await axios.get('http://localhost:3001/api/insumos', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setInsumos(res.data);
+  } catch (err) {
+    console.error('Error al obtener insumos:', err);
+  }
+};
 
     fetchInsumos();
   }, []);
 
-  const insumosFiltrados = insumos.filter((i) =>
-    i.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const manejarOrden = (campo) => {
+  if (ordenCampo === campo) {
+    setOrdenDireccion((prev) => (prev === 'asc' ? 'desc' : 'asc')); // alterna
+  } else {
+    setOrdenCampo(campo);
+    setOrdenDireccion('asc'); // empieza ascendente
+  }
+};
 
-  const obtenerEstadoStock = (cantidad) => {
-    if (cantidad === 0) return { texto: 'Agotado', clase: 'bg-red-200 text-red-800' };
-    if (cantidad < 10) return { texto: 'Stock bajo', clase: 'bg-yellow-200 text-yellow-800' };
-    return { texto: 'En stock', clase: 'bg-green-200 text-green-800' };
-  };
+
+   const obtenerEstadoStock = (cantidad, stockMinimo) => {
+  if (cantidad === 0) return { texto: 'Agotado', clase: 'bg-red-200 text-red-800' };
+  if (cantidad < stockMinimo) return { texto: 'Stock bajo', clase: 'bg-yellow-200 text-yellow-800' };
+  return { texto: 'En stock', clase: 'bg-green-200 text-green-800' };
+};
+
+
+
+ const insumosFiltrados = insumos.filter((i) => {
+  const valor =
+  campoFiltro === 'unidad'
+    ? i.unidad?.descripcion || ''
+    : campoFiltro === 'categoria'
+    ? i.categoria?.nombre || ''
+    : campoFiltro === 'estado'
+    ? obtenerEstadoStock(i.cantidad).texto
+    : campoFiltro === 'idInsumo'
+    ? String(i.idInsumo) // 👈 lo pasamos a string para usar `.includes()`
+    : i[campoFiltro] || '';
+
+
+  return valor.toLowerCase().includes(busqueda.toLowerCase());
+});
+
+const insumosOrdenados = [...insumosFiltrados].sort((a, b) => {
+  if (!ordenCampo) return 0;
+
+  let aValor = a[ordenCampo];
+  let bValor = b[ordenCampo];
+
+  // Para campos especiales como unidad, categoría o estado
+  if (ordenCampo === 'unidad') {
+    aValor = a.unidad?.descripcion || '';
+    bValor = b.unidad?.descripcion || '';
+  } else if (ordenCampo === 'categoria') {
+    aValor = a.categoria?.nombre || '';
+    bValor = b.categoria?.nombre || '';
+  } else if (ordenCampo === 'estado') {
+    aValor = obtenerEstadoStock(a.cantidad, a.stockMinimo || 10).texto;
+    bValor = obtenerEstadoStock(b.cantidad, b.stockMinimo || 10).texto;
+  }
+
+  // Para evitar errores al comparar texto o número
+  if (typeof aValor === 'string') {
+    aValor = aValor.toLowerCase();
+    bValor = bValor.toLowerCase();
+  }
+
+  if (aValor < bValor) return ordenDireccion === 'asc' ? -1 : 1;
+  if (aValor > bValor) return ordenDireccion === 'asc' ? 1 : -1;
+  return 0;
+});
+
+
+
+  const indiceInicio = (paginaActual - 1) * filasPorPagina;
+  const indiceFin = indiceInicio + filasPorPagina;
+  const insumosPaginados = insumosOrdenados.slice(indiceInicio, indiceFin);
+  const totalPaginas = Math.ceil(insumosFiltrados.length / filasPorPagina);
+
+ 
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-inter">
@@ -61,54 +141,127 @@ export default function ConsultarInsumosPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/insumos/agregar')}
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
-            >
-              Agregar insumo
-            </button>
-            <UserHeader />
-          </div>
+  <button
+    onClick={() => router.push('/insumos/agregar')}
+    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
+  >
+    Agregar insumo
+  </button>
+  <button
+    onClick={() => router.push('/insumos/carga_masiva')}
+    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-semibold"
+  >
+    Carga Masiva
+  </button>
+
+  
+
+  <UserHeader />
+</div>
+
         </div>
 
+        <ResumenInventario insumos={insumos} />
+
+
         <div className="bg-white rounded-xl shadow p-6">
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4 text-sm">
+            <div>
               Mostrar
-              <select className="mx-2 border rounded px-2 py-1 text-sm">
-                <option>5</option>
-                <option>10</option>
-                <option>20</option>
+              <select
+                className="mx-2 border rounded px-2 py-1"
+                value={filasPorPagina}
+                onChange={(e) => {
+                  setFilasPorPagina(Number(e.target.value));
+                  setPaginaActual(1);
+                }}
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
               </select>
               filas por página
             </div>
-            <input
-              type="text"
-              placeholder="Buscar por nombre..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="border rounded px-3 py-1 text-sm"
-            />
+
+            <div className="flex gap-2 items-center">
+              <label htmlFor="campo" className="text-gray-600">Filtrar por:</label>
+              <select
+                id="campo"
+                value={campoFiltro}
+                onChange={(e) => {
+                  setCampoFiltro(e.target.value);
+                  setPaginaActual(1);
+                }}
+                className="border rounded px-2 py-1"
+              >
+                <option value="nombre">Nombre</option>
+                <option value="categoria">Categoría</option>
+                <option value="unidad">Unidad</option>
+                <option value="estado">Estado</option>
+                <option value="idInsumo">ID</option>
+
+
+              </select>
+
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={busqueda}
+                onChange={(e) => {
+                  setBusqueda(e.target.value);
+                  setPaginaActual(1);
+                }}
+                className="border rounded px-3 py-1"
+              />
+            </div>
           </div>
 
           <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left border-b text-gray-600">
-                <th className="py-2">Nombre</th>
-                <th>Unidad</th>
-                <th>Cantidad</th>
-                <th>Estado</th>
-                <th>Detalle</th>
-              </tr>
-            </thead>
+           
+
+              <thead>
+  <tr className="text-left border-b text-gray-600">
+    <th className="py-2 cursor-pointer" onClick={() => manejarOrden('idInsumo')}>
+      ID {ordenCampo === 'idInsumo' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="py-2 cursor-pointer" onClick={() => manejarOrden('nombre')}>
+      Nombre {ordenCampo === 'nombre' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('unidad')}>
+      Unidad {ordenCampo === 'unidad' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('categoria')}>
+      Categoría {ordenCampo === 'categoria' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('cantidad')}>
+      Cantidad {ordenCampo === 'cantidad' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th className="cursor-pointer" onClick={() => manejarOrden('estado')}>
+      Estado {ordenCampo === 'estado' && (ordenDireccion === 'asc' ? '▲' : '▼')}
+    </th>
+    <th>Detalle</th>
+  </tr>
+</thead>
+
+            
             <tbody>
-              {insumosFiltrados.length > 0 ? (
-                insumosFiltrados.map((insumo) => {
-                  const estado = obtenerEstadoStock(insumo.cantidad);
+              {insumosPaginados.length > 0 ? (
+                insumosPaginados.map((insumo) => {
+                  const estado = !insumo.activo
+  ? { texto: 'Inactivo', clase: 'bg-gray-300 text-gray-700' }
+  : obtenerEstadoStock(insumo.cantidad, insumo.stockMinimo || 10);
+
+
                   return (
                     <tr key={insumo.idInsumo} className="border-b hover:bg-gray-50">
-                      <td className="py-2">{insumo.nombre}</td>
+                      <td className="text-gray-500">{insumo.idInsumo}</td>
+                      <td>
+                        <span className={insumo.activo ? '' : 'line-through text-red-600'}>
+                          {insumo.nombre}
+                        </span>
+                      </td>
                       <td>{insumo.unidad?.descripcion || '—'}</td>
+                      <td>{insumo.categoria?.nombre || '—'}</td>
                       <td>{insumo.cantidad}</td>
                       <td>
                         <span className={`text-xs font-semibold px-3 py-1 rounded-full ${estado.clase}`}>
@@ -118,7 +271,6 @@ export default function ConsultarInsumosPage() {
                       <td>
                         <button
                           onClick={() => router.push(`/insumos/editar/${insumo.idInsumo}`)}
-
                           className="bg-gray-300 text-gray-800 px-3 py-1 rounded text-xs"
                         >
                           DETALLE
@@ -129,7 +281,7 @@ export default function ConsultarInsumosPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan="5" className="text-center py-4 text-gray-400">
+                  <td colSpan="7" className="text-center py-4 text-gray-400">
                     No se encontraron insumos.
                   </td>
                 </tr>
@@ -138,10 +290,26 @@ export default function ConsultarInsumosPage() {
           </table>
 
           <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
-            <span>1–{insumosFiltrados.length} de {insumos.length}</span>
+            <span>
+              {insumosFiltrados.length === 0
+                ? '0'
+                : `${indiceInicio + 1}–${Math.min(indiceFin, insumosFiltrados.length)} de ${insumosFiltrados.length}`}
+            </span>
             <div>
-              <button className="mr-2 text-gray-500">&lt;</button>
-              <button className="text-gray-500">&gt;</button>
+              <button
+                onClick={() => setPaginaActual((prev) => Math.max(prev - 1, 1))}
+                disabled={paginaActual === 1}
+                className="mr-2 text-gray-500 disabled:opacity-50"
+              >
+                &lt;
+              </button>
+              <button
+                onClick={() => setPaginaActual((prev) => Math.min(prev + 1, totalPaginas))}
+                disabled={paginaActual === totalPaginas || totalPaginas === 0}
+                className="text-gray-500 disabled:opacity-50"
+              >
+                &gt;
+              </button>
             </div>
           </div>
         </div>

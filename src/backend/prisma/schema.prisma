@@ -15,78 +15,78 @@ enum Gender {
 }
 
 model CategoriaInsumo {
-  idCategoria Int     @id @default(autoincrement()) @map("id_categoria")
-  nombre      String  @unique                       @map("nombre")
-  insumos     Insumo[]                              @relation("CategoriaInsumos")
+  idCategoria Int      @id @default(autoincrement()) @map("id_categoria")
+  nombre      String   @unique @map("nombre")
+  insumos     Insumo[] @relation("CategoriaInsumos")
 
   @@map("categorias_insumo")
 }
 
-
 /// Roles de usuario
 model Role {
-  idRol       Int           @id @default(autoincrement()) @map("id_rol")
-  nombreRol   String        @unique                       @map("nombre_rol")
+  idRol     Int    @id @default(autoincrement()) @map("id_rol")
+  nombreRol String @unique @map("nombre_rol")
 
-  sesiones    Sesion[]      @relation("RoleSesiones")
-  rolUsuario  RolUsuario[]  @relation("RoleRolUsuario")
+  sesiones   Sesion[]     @relation("RoleSesiones")
+  rolUsuario RolUsuario[] @relation("RoleRolUsuario")
 
   @@map("roles")
 }
 
 /// Usuarios de la aplicación
 model Usuario {
-  idUsuario             Int               @id @default(autoincrement()) @map("id_usuario")
-  nombre                String
-  apellido              String
-  documento             BigInt?           @map("documento")
-  genero                Gender            @map("genero")
-  direccion             String?           @map("direccion")
-  telefono              String?           @map("telefono")
-  emailCorporativo      String            @unique @map("email_corporativo")
-  emailPersonal         String?           @map("email_personal")
-  username              String            @unique
-  password              String
-  isVerified            Boolean           @default(false) @map("is_verified")
-  verificationToken     String?           @map("verification_token")
-  verificationTokenExpires DateTime?      @map("verification_token_expires")
-  resetToken            String?           @map("reset_token")
-  resetTokenExpires     DateTime?         @map("reset_token_expires")
-  activo                Boolean           @default(true)
-  createdAt             DateTime          @default(now()) @map("created_at")
-  updatedAt             DateTime          @updatedAt      @map("updated_at")
-  lastLogin             DateTime?         @map("last_login")
+  idUsuario                Int       @id @default(autoincrement()) @map("id_usuario")
+  nombre                   String
+  apellido                 String
+  documento                BigInt?   @map("documento")
+  genero                   Gender    @map("genero")
+  direccion                String?   @map("direccion")
+  telefono                 String?   @map("telefono")
+  emailCorporativo         String    @unique @map("email_corporativo")
+  emailPersonal            String?   @map("email_personal")
+  username                 String    @unique
+  password                 String
+  isVerified               Boolean   @default(false) @map("is_verified")
+  verificationToken        String?   @map("verification_token")
+  verificationTokenExpires DateTime? @map("verification_token_expires")
+  resetToken               String?   @map("reset_token")
+  resetTokenExpires        DateTime? @map("reset_token_expires")
+  activo                   Boolean   @default(true)
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+  lastLogin                DateTime? @map("last_login")
 
-  sesiones              Sesion[]          @relation("UsuarioSesiones")
-  rolUsuario            RolUsuario[]      @relation("UsuarioRolUsuario")
-  rolUsuarioCreador     RolUsuario[]      @relation("RolUsuarioCreador")
-  rolUsuarioModificador RolUsuario[]      @relation("RolUsuarioModificador")
+  sesiones              Sesion[]     @relation("UsuarioSesiones")
+  rolUsuario            RolUsuario[] @relation("UsuarioRolUsuario")
+  rolUsuarioCreador     RolUsuario[] @relation("RolUsuarioCreador")
+  rolUsuarioModificador RolUsuario[] @relation("RolUsuarioModificador")
 
-  ticketsCreado         Ticket[]          @relation("TicketsCreado")
-  ticketsAsignado       Ticket[]          @relation("TicketsAsignado")
-  ticketsModificado     Ticket[]          @relation("TicketsModificado")
+  ticketsCreado     Ticket[] @relation("TicketsCreado")
+  ticketsAsignado   Ticket[] @relation("TicketsAsignado")
+  ticketsModificado Ticket[] @relation("TicketsModificado")
 
-  historialesTicket     HistorialTicket[] @relation("UsuarioHistorial")
-  mensajesTicket        MensajeTicket[]   @relation("UsuarioMensajesTicket")
-  insumosXTicket        InsumosXTicket[]  @relation("UsuarioInsumosXTicket")
+  historialesTicket HistorialTicket[] @relation("UsuarioHistorial")
+  mensajesTicket    MensajeTicket[]   @relation("UsuarioMensajesTicket")
+  insumosXTicket    InsumosXTicket[]  @relation("UsuarioInsumosXTicket")
 
-  novedadesCreadas      Novedad[]         @relation("NovedadCreador")
-  novedadesModificadas  Novedad[]         @relation("NovedadModificador")
+  novedadesCreadas     Novedad[]      @relation("NovedadCreador")
+  novedadesModificadas Novedad[]      @relation("NovedadModificador")
+  notificaciones       Notificacion[] @relation("UsuarioNotificaciones")
 
   @@map("usuarios")
 }
 
 /// Sesiones de usuario
 model Sesion {
-  idSesion     Int               @id @default(autoincrement()) @map("id_sesion")
-  idRol        Int               @map("id_rol")
-  idUsuario    Int               @map("id_usuario")
-  fecInicio    DateTime          @default(now())               @map("fec_inicio")
-  fecFin       DateTime?         @map("fec_fin")
-  token        String            @unique
+  idSesion  Int       @id @default(autoincrement()) @map("id_sesion")
+  idRol     Int       @map("id_rol")
+  idUsuario Int       @map("id_usuario")
+  fecInicio DateTime  @default(now()) @map("fec_inicio")
+  fecFin    DateTime? @map("fec_fin")
+  token     String    @unique
 
-  rol          Role              @relation("RoleSesiones", fields: [idRol], references: [idRol])
-  usuario      Usuario           @relation("UsuarioSesiones", fields: [idUsuario], references: [idUsuario])
+  rol     Role    @relation("RoleSesiones", fields: [idRol], references: [idRol])
+  usuario Usuario @relation("UsuarioSesiones", fields: [idUsuario], references: [idUsuario])
 
   mensajesNovedad MensajeNovedad[] @relation("SesionMensajesNovedad")
 
@@ -95,20 +95,20 @@ model Sesion {
 
 /// Asignación de roles a usuarios
 model RolUsuario {
-  idRolUsuario   Int      @id @default(autoincrement()) @map("id_rol_usuario")
-  idRol          Int      @map("id_rol")
-  idUsuario      Int      @map("id_usuario")
-  fecInicio      DateTime @default(now())               @map("fec_inicio")
-  fecFin         DateTime?@map("fec_fin")
-  idUsuarioCrea  Int      @map("id_usuario_crea")
-  idUsuarioModif Int?     @map("id_usuario_modif")
-  fecModif       DateTime @default(now())               @map("fec_modif")
-  activo         Boolean  @default(true)
+  idRolUsuario   Int       @id @default(autoincrement()) @map("id_rol_usuario")
+  idRol          Int       @map("id_rol")
+  idUsuario      Int       @map("id_usuario")
+  fecInicio      DateTime  @default(now()) @map("fec_inicio")
+  fecFin         DateTime? @map("fec_fin")
+  idUsuarioCrea  Int       @map("id_usuario_crea")
+  idUsuarioModif Int?      @map("id_usuario_modif")
+  fecModif       DateTime  @default(now()) @map("fec_modif")
+  activo         Boolean   @default(true)
 
-  rol            Role      @relation("RoleRolUsuario",    fields: [idRol],          references: [idRol])
-  usuario        Usuario   @relation("UsuarioRolUsuario", fields: [idUsuario],      references: [idUsuario])
-  creador        Usuario   @relation("RolUsuarioCreador",   fields: [idUsuarioCrea],  references: [idUsuario])
-  modificador    Usuario?  @relation("RolUsuarioModificador", fields: [idUsuarioModif], references: [idUsuario])
+  rol         Role     @relation("RoleRolUsuario", fields: [idRol], references: [idRol])
+  usuario     Usuario  @relation("UsuarioRolUsuario", fields: [idUsuario], references: [idUsuario])
+  creador     Usuario  @relation("RolUsuarioCreador", fields: [idUsuarioCrea], references: [idUsuario])
+  modificador Usuario? @relation("RolUsuarioModificador", fields: [idUsuarioModif], references: [idUsuario])
 
   @@map("rol_usuario")
 }
@@ -125,49 +125,49 @@ model PrioridadesTicket {
 /// Estados posibles de un ticket
 model EstadoTicket {
   idEstadoTicket Int               @id @default(autoincrement()) @map("id_estado_ticket")
-  nombre          String            @unique
-  historiales     HistorialTicket[] @relation("EstadoHistoriales")
+  nombre         String            @unique
+  historiales    HistorialTicket[] @relation("EstadoHistoriales")
 
   @@map("estados_ticket")
 }
 
 /// Tickets de soporte
 model Ticket {
-  idTicket              Int               @id @default(autoincrement()) @map("id_ticket")
+  idTicket              Int      @id @default(autoincrement()) @map("id_ticket")
   titulo                String
   descripcion           String
-  idUsuarioCreador      Int               @map("id_usuario_creador")
-  idUsuarioAsignado     Int?              @map("id_usuario_asignado")
-  idPrioridad           Int               @map("id_prioridad")
-  idTipoTicket          Int?              @map("id_tipo_ticket")
-  fecCreacion           DateTime          @default(now()) @map("fec_creacion")
-  idUsuarioModificacion Int?              @map("id_usuario_modificacion")
-  fecModif              DateTime          @default(now()) @map("fec_modif")
+  idUsuarioCreador      Int      @map("id_usuario_creador")
+  idUsuarioAsignado     Int?     @map("id_usuario_asignado")
+  idPrioridad           Int      @map("id_prioridad")
+  idTipoTicket          Int?     @map("id_tipo_ticket")
+  fecCreacion           DateTime @default(now()) @map("fec_creacion")
+  idUsuarioModificacion Int?     @map("id_usuario_modificacion")
+  fecModif              DateTime @default(now()) @map("fec_modif")
 
-  creador               Usuario           @relation("TicketsCreado",        fields: [idUsuarioCreador],      references: [idUsuario])
-  asignado              Usuario?          @relation("TicketsAsignado",      fields: [idUsuarioAsignado],     references: [idUsuario])
-  modificador           Usuario?          @relation("TicketsModificado",    fields: [idUsuarioModificacion], references: [idUsuario])
-  prioridad             PrioridadesTicket @relation("PrioridadTickets",     fields: [idPrioridad],           references: [idPrioridad])
-  historiales           HistorialTicket[] @relation("TicketHistoriales")
-  mensajes              MensajeTicket[]   @relation("TicketMensajes")
-  insumosXTicket        InsumosXTicket[]  @relation("TicketInsumosXTicket")
-  archivos              Archivo[]         @relation("TicketArchivos")
+  creador        Usuario           @relation("TicketsCreado", fields: [idUsuarioCreador], references: [idUsuario])
+  asignado       Usuario?          @relation("TicketsAsignado", fields: [idUsuarioAsignado], references: [idUsuario])
+  modificador    Usuario?          @relation("TicketsModificado", fields: [idUsuarioModificacion], references: [idUsuario])
+  prioridad      PrioridadesTicket @relation("PrioridadTickets", fields: [idPrioridad], references: [idPrioridad])
+  historiales    HistorialTicket[] @relation("TicketHistoriales")
+  mensajes       MensajeTicket[]   @relation("TicketMensajes")
+  insumosXTicket InsumosXTicket[]  @relation("TicketInsumosXTicket")
+  archivos       Archivo[]         @relation("TicketArchivos")
 
   @@map("tickets")
 }
 
 /// Registro de cambios de estado en tickets
 model HistorialTicket {
-  idHistorialTicket Int       @id @default(autoincrement()) @map("id_historial_ticket")
-  idTicket          Int       @map("id_ticket")
-  idEstadoTk        Int       @map("id_estado_tk")
-  idUsuario         Int       @map("id_usuario")
-  comentario        String?   @map("comentario")
-  fecCreacion       DateTime  @default(now())             @map("fec_creacion")
+  idHistorialTicket Int      @id @default(autoincrement()) @map("id_historial_ticket")
+  idTicket          Int      @map("id_ticket")
+  idEstadoTk        Int      @map("id_estado_tk")
+  idUsuario         Int      @map("id_usuario")
+  comentario        String?  @map("comentario")
+  fecCreacion       DateTime @default(now()) @map("fec_creacion")
 
-  ticket            Ticket          @relation("TicketHistoriales", fields: [idTicket],  references: [idTicket])
-  estado            EstadoTicket    @relation("EstadoHistoriales", fields: [idEstadoTk], references: [idEstadoTicket])
-  usuario           Usuario         @relation("UsuarioHistorial",   fields: [idUsuario],   references: [idUsuario])
+  ticket  Ticket       @relation("TicketHistoriales", fields: [idTicket], references: [idTicket])
+  estado  EstadoTicket @relation("EstadoHistoriales", fields: [idEstadoTk], references: [idEstadoTicket])
+  usuario Usuario      @relation("UsuarioHistorial", fields: [idUsuario], references: [idUsuario])
 
   @@map("historiales_ticket")
 }
@@ -178,36 +178,49 @@ model MensajeTicket {
   idTicket      Int      @map("id_ticket")
   cuerpoMsj     String   @map("cuerpo_msj")
   idUsuarioCrea Int      @map("id_usuario_crea")
-  fecCreacion   DateTime @default(now())                   @map("fec_creacion")
+  fecCreacion   DateTime @default(now()) @map("fec_creacion")
 
-  ticket        Ticket   @relation("TicketMensajes",      fields: [idTicket],        references: [idTicket])
-  creador       Usuario  @relation("UsuarioMensajesTicket", fields: [idUsuarioCrea],    references: [idUsuario])
+  ticket  Ticket  @relation("TicketMensajes", fields: [idTicket], references: [idTicket])
+  creador Usuario @relation("UsuarioMensajesTicket", fields: [idUsuarioCrea], references: [idUsuario])
 
   @@map("mensajes_ticket")
 }
 
 /// Unidades de medida para insumos
 model Unidades {
-  idUnidad    Int       @id @default(autoincrement()) @map("id_unidad")
-  descripcion String    @unique @map("descripcion") 
-  insumos     Insumo[]  @relation("UnidadInsumos")
+  idUnidad    Int      @id @default(autoincrement()) @map("id_unidad")
+  descripcion String   @unique @map("descripcion")
+  insumos     Insumo[] @relation("UnidadInsumos")
 
   @@map("unidades")
 }
 
+model Notificacion {
+  idNotificacion Int      @id @default(autoincrement()) @map("id_notificacion")
+  mensaje        String   @map("mensaje")
+  leido          Boolean  @default(false) @map("leido")
+  fecha          DateTime @default(now()) @map("fecha")
+  idUsuario      Int      @map("id_usuario")
+
+  usuario Usuario @relation("UsuarioNotificaciones", fields: [idUsuario], references: [idUsuario])
+
+  @@map("notificaciones")
+}
 
 model Insumo {
-  idInsumo       Int               @id @default(autoincrement()) @map("id_insumo")
-  nombre         String            @map("nombre")
-  cantidad       Int               @map("cantidad")
-  idUnidad       Int               @map("id_unidad")
-  idCategoria    Int               @map("id_categoria")
-  precioUnitario Float             @default(0)                   @map("precio_unitario")
-  descripcion    String?           @map("descripcion")
+  idInsumo       Int     @id @default(autoincrement()) @map("id_insumo")
+  nombre         String  @map("nombre")
+  cantidad       Int     @map("cantidad")
+  idUnidad       Int     @map("id_unidad")
+  idCategoria    Int     @map("id_categoria")
+  precioUnitario Float   @default(0) @map("precio_unitario")
+  descripcion    String? @map("descripcion")
+  stockMinimo    Int     @default(0) @map("stock_minimo")
+  activo         Boolean @default(true) @map("activo")
 
-  unidad         Unidades          @relation("UnidadInsumos", fields: [idUnidad], references: [idUnidad])
-  categoria      CategoriaInsumo   @relation("CategoriaInsumos", fields: [idCategoria], references: [idCategoria])
-  insumosXTicket InsumosXTicket[]  @relation("InsumoInsumosXTickets")
+  unidad         Unidades         @relation("UnidadInsumos", fields: [idUnidad], references: [idUnidad])
+  categoria      CategoriaInsumo  @relation("CategoriaInsumos", fields: [idCategoria], references: [idCategoria])
+  insumosXTicket InsumosXTicket[] @relation("InsumoInsumosXTickets")
 
   @@map("insumos")
 }
@@ -218,70 +231,70 @@ model InsumosXTicket {
   idInsumo              Int      @map("id_insumo")
   idTicket              Int      @map("id_ticket")
   idUsuarioModificacion Int      @map("id_usuario_modificacion")
-  fecModificacion       DateTime @default(now())                @map("fec_modificacion")
+  fecModificacion       DateTime @default(now()) @map("fec_modificacion")
 
-  insumo       Insumo  @relation("InsumoInsumosXTickets", fields: [idInsumo], references: [idInsumo])
-  ticket       Ticket  @relation("TicketInsumosXTicket", fields: [idTicket], references: [idTicket])
-  modificador  Usuario @relation("UsuarioInsumosXTicket", fields: [idUsuarioModificacion], references: [idUsuario])
+  insumo      Insumo  @relation("InsumoInsumosXTickets", fields: [idInsumo], references: [idInsumo])
+  ticket      Ticket  @relation("TicketInsumosXTicket", fields: [idTicket], references: [idTicket])
+  modificador Usuario @relation("UsuarioInsumosXTicket", fields: [idUsuarioModificacion], references: [idUsuario])
 
   @@map("insumos_x_ticket")
 }
 
 /// Novedades del sistema
 model Novedad {
-  idNovedad             Int               @id @default(autoincrement()) @map("id_novedad")
-  titulo                String            @map("titulo")
-  descripcion           String            @map("descripcion")
-  idUsuarioCreador      Int               @map("id_usuario_creador")
-  fecCreacion           DateTime          @default(now())               @map("fec_creacion")
-  idUsuarioModificacion Int?              @map("id_usuario_modificacion")
-  fecModificacion       DateTime          @default(now())               @map("fec_modificacion")
+  idNovedad             Int      @id @default(autoincrement()) @map("id_novedad")
+  titulo                String   @map("titulo")
+  descripcion           String   @map("descripcion")
+  idUsuarioCreador      Int      @map("id_usuario_creador")
+  fecCreacion           DateTime @default(now()) @map("fec_creacion")
+  idUsuarioModificacion Int?     @map("id_usuario_modificacion")
+  fecModificacion       DateTime @default(now()) @map("fec_modificacion")
 
-  creador               Usuario           @relation("NovedadCreador",     fields: [idUsuarioCreador],      references: [idUsuario])
-  modificador           Usuario?          @relation("NovedadModificador", fields: [idUsuarioModificacion], references: [idUsuario])
-  mensajes              MensajeNovedad[]  @relation("NovedadMensajes")
-  archivos              Archivo[]         @relation("NovedadArchivos")
+  creador     Usuario          @relation("NovedadCreador", fields: [idUsuarioCreador], references: [idUsuario])
+  modificador Usuario?         @relation("NovedadModificador", fields: [idUsuarioModificacion], references: [idUsuario])
+  mensajes    MensajeNovedad[] @relation("NovedadMensajes")
+  archivos    Archivo[]        @relation("NovedadArchivos")
 
   @@map("novedades")
 }
 
 /// Mensajes de novedad
 model MensajeNovedad {
-  idMensaje     Int      @id @default(autoincrement()) @map("id_mensaje")
-  idNovedad     Int      @map("id_novedad")
-  cuerpoMsj     String   @map("cuerpo_msj")
-  idSesionCrea  Int      @map("id_sesion_crea")
-  fecCreacion   DateTime @default(now())                   @map("fec_creacion")
+  idMensaje    Int      @id @default(autoincrement()) @map("id_mensaje")
+  idNovedad    Int      @map("id_novedad")
+  cuerpoMsj    String   @map("cuerpo_msj")
+  idSesionCrea Int      @map("id_sesion_crea")
+  fecCreacion  DateTime @default(now()) @map("fec_creacion")
 
-  novedad       Novedad  @relation("NovedadMensajes",     fields: [idNovedad],      references: [idNovedad])
-  sesion        Sesion   @relation("SesionMensajesNovedad", fields: [idSesionCrea],  references: [idSesion])
+  novedad Novedad @relation("NovedadMensajes", fields: [idNovedad], references: [idNovedad])
+  sesion  Sesion  @relation("SesionMensajesNovedad", fields: [idSesionCrea], references: [idSesion])
 
   @@map("mensajes_novedad")
 }
 
 /// Tipos de archivo
 model TipoArchivo {
-  idTipoArchivo  Int        @id @default(autoincrement()) @map("id_tipo_archivo")
-  nombre         String     @unique
-  archivos       Archivo[]  @relation("TipoArchivoArchivos")
+  idTipoArchivo Int       @id @default(autoincrement()) @map("id_tipo_archivo")
+  nombre        String    @unique
+  archivos      Archivo[] @relation("TipoArchivoArchivos")
 
   @@map("tipos_archivo")
 }
 
 /// Archivos adjuntos
 model Archivo {
-  idArchivo       Int         @id @default(autoincrement()) @map("id_archivo")
-  idTicket        Int?        @map("id_ticket")
-  idNovedad       Int?        @map("id_novedad")
-  nombre          String      @map("nombre")
-  ruta            String      @map("ruta")
-  descripcion     String?     @map("descripcion")
-  idTipoArchivo   Int         @map("id_tipo_archivo")
-  fecCreacion     DateTime    @default(now()) @map("fec_creacion")
+  idArchivo     Int      @id @default(autoincrement()) @map("id_archivo")
+  idTicket      Int?     @map("id_ticket")
+  idNovedad     Int?     @map("id_novedad")
+  nombre        String   @map("nombre")
+  ruta          String   @map("ruta")
+  descripcion   String?  @map("descripcion")
+  idTipoArchivo Int      @map("id_tipo_archivo")
+  fecCreacion   DateTime @default(now()) @map("fec_creacion")
 
-  ticket          Ticket?     @relation("TicketArchivos", fields: [idTicket],   references: [idTicket])
-  novedad         Novedad?    @relation("NovedadArchivos", fields: [idNovedad],  references: [idNovedad])
-  tipoArchivo     TipoArchivo @relation("TipoArchivoArchivos", fields: [idTipoArchivo], references: [idTipoArchivo])
+  ticket      Ticket?     @relation("TicketArchivos", fields: [idTicket], references: [idTicket])
+  novedad     Novedad?    @relation("NovedadArchivos", fields: [idNovedad], references: [idNovedad])
+  tipoArchivo TipoArchivo @relation("TipoArchivoArchivos", fields: [idTipoArchivo], references: [idTipoArchivo])
 
   @@map("archivos")
 }

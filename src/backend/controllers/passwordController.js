@@ -7,6 +7,7 @@ import { sendResetPasswordEmail } from '../utils/mailer.js';
 dotenv.config();
 const prisma = new PrismaClient();
 
+
 // Solicitar recuperación de contraseña
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -42,6 +43,7 @@ export const forgotPassword = async (req, res) => {
     return res.status(500).json({ error: 'Error al solicitar recuperación' });
   }
 };
+
 
 // Actualizar contraseña
 export const resetPassword = async (req, res) => {

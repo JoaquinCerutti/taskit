@@ -7,6 +7,7 @@ dotenv.config();
 const prisma = new PrismaClient();
 const SECRET_KEY = process.env.JWT_SECRET;
 
+
 // Loguear usuario
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
@@ -37,10 +38,11 @@ export const loginUser = async (req, res) => {
 
     // Genera el JWT
     const token = jwt.sign(
-      { userId: user.idUsuario, email: user.emailCorporativo },
-      SECRET_KEY,
-      { expiresIn: '2h' }
-    );
+  { idUsuario: user.idUsuario, email: user.emailCorporativo },
+  SECRET_KEY,
+  { expiresIn: '2h' }
+);
+
 
     // Desestructura para eliminar campos sensibles
     const {

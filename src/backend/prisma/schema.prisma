@@ -250,11 +250,15 @@ model Novedad {
   fecCreacion           DateTime @default(now()) @map("fec_creacion")
   idUsuarioModificacion Int?     @map("id_usuario_modificacion")
   fecModificacion       DateTime @default(now()) @map("fec_modificacion")
+  idSectorDestino       Int      @map("id_sector_destino")
+  idCategoriaNovedad    Int      @map("id_categoria_novedad")
 
   creador     Usuario          @relation("NovedadCreador", fields: [idUsuarioCreador], references: [idUsuario])
   modificador Usuario?         @relation("NovedadModificador", fields: [idUsuarioModificacion], references: [idUsuario])
   mensajes    MensajeNovedad[] @relation("NovedadMensajes")
   archivos    Archivo[]        @relation("NovedadArchivos")
+  sector      Sector           @relation("SectorNovedades", fields: [idSectorDestino], references: [idSector])
+  categoria   CategoriaNovedad @relation("CategoriaNovedadNovedades", fields: [idCategoriaNovedad], references: [idCategoriaNovedad])
 
   @@map("novedades")
 }
@@ -307,4 +311,20 @@ model TipoTicket {
   tickets      Ticket[] @relation("TipoTicketTickets")
 
   @@map("tipos_ticket")
+}
+
+model Sector {
+  idSector   Int       @id @default(autoincrement()) @map("id_sector")
+  nombre     String    @unique @map("nombre")
+  novedades  Novedad[] @relation("SectorNovedades")
+
+  @@map("sectores")
+}
+
+model CategoriaNovedad {
+  idCategoriaNovedad Int       @id @default(autoincrement()) @map("id_categoria_novedad")
+  nombre             String    @unique @map("nombre")
+  novedades          Novedad[] @relation("CategoriaNovedadNovedades")
+
+  @@map("categorias_novedad")
 }

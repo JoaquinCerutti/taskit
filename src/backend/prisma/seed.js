@@ -46,6 +46,28 @@ async function main() {
   }
 
   console.log('Seed de unidades completado');
+
+  // Seed de categorías de novedad
+  const categoriasNovedad = [
+    'Urgente',
+    'Arribos',
+    'Mantenimiento',
+    'Housekeeping',
+    'Cocina y Bar',
+    'Recepcion',
+    'Olvidos',
+    'RRHH',
+  ];
+
+  for (const nombre of categoriasNovedad) {
+    await prisma.categoriaNovedad.upsert({
+      where: { nombre },
+      update: {},
+      create: { nombre },
+    });
+  }
+
+  console.log('Seed de categorías de novedad completado');
 }
 
 main()

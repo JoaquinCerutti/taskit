@@ -64,7 +64,7 @@ export default function UsuariosPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-bold">Usuarios</h1>
-            <p className="text-sm text-gray-500">Administra fácilmente las cuentas y permisos de tu equipo</p>
+            <p className="text-sm text-gray-500">Administración de cuentas y permisos del equipo</p>
           </div>
 
           <div className="flex items-center gap-4">

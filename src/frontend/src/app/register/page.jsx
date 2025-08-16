@@ -285,19 +285,20 @@ export default function RegisterPage() {
 
         <div className="bg-white rounded-xl shadow px-6 pb-6 pt-0 mt-[-24px] flex justify-end gap-4">
           <button
-            type="submit"
-            onClick={handleSubmit}
-            className="bg-[#064431] hover:bg-green-700 text-white py-2 px-6 rounded-lg font-medium transition"
-          >
-            Crear usuario
-          </button>
-          <button
             type="button"
             onClick={() => router.push('/main')}
             className="bg-[#992828] hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
           >
             Cancelar
           </button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="bg-[#064431] hover:bg-green-700 text-white py-2 px-6 rounded-lg font-medium transition"
+          >
+            Crear usuario
+          </button>
+          
         </div>
       </main>
     </div>

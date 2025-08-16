@@ -86,7 +86,7 @@ export default function AgregarInsumoPage() {
 
       {/* Main content */}
       <main className="flex-1 p-10">
-        <h1 className="text-2xl font-bold mb-1">Nuevo Item</h1>
+        <h1 className="text-2xl font-bold mb-1">Nuevo Insumo</h1>
         <p className="text-sm text-gray-500 mb-6">Ingrese los datos para crear un nuevo insumo</p>
 
         <button onClick={() => router.back()} className="text-green-700 text-sm mb-6 flex items-center">
@@ -228,13 +228,13 @@ export default function AgregarInsumoPage() {
               <button
                 type="button"
                 onClick={() => router.push('/insumos/consultar_insumos')}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded"
+                className="bg-[#992828] hover:bg-red-700 text-white px-6 py-2 rounded"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded"
+                className="bg-[#064431] hover:bg-green-800 text-white px-6 py-2 rounded"
               >
                 Agregar Insumo
               </button>

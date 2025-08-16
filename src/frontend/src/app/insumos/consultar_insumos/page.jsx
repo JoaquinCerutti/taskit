@@ -143,7 +143,7 @@ const insumosOrdenados = [...insumosFiltrados].sort((a, b) => {
           <div className="flex items-center gap-4">
   <button
     onClick={() => router.push('/insumos/agregar')}
-    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
+    className="bg-[#064431] hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
   >
     Agregar insumo
   </button>

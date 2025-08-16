@@ -22,7 +22,7 @@ export default function ProfilePage() {
           getUserById(id),
           axios.get('http://localhost:3001/api/roles')
         ]);
-        console.log('🧾 Usuario recibido:', user);
+        console.log('Usuario recibido:', user);
         setForm(user);
         setRoles(rolesRes.data);
         setLoading(false);
@@ -58,14 +58,14 @@ export default function ProfilePage() {
         activo
       };
 
-      console.log('📤 Enviando al backend:', cleanUser);
+      console.log('Enviando al backend:', cleanUser);
       const response = await updateUser(id, cleanUser);
-      console.log('✅ Usuario actualizado:', response.user);
+      console.log('Usuario actualizado:', response.user);
 
       setForm(response.user);
       alert('Cambios guardados con éxito');
     } catch (err) {
-      console.error('❌ Error al guardar:', err);
+      console.error('Error al guardar:', err);
       alert('Error al guardar');
     } finally {
       setSaving(false);
@@ -189,7 +189,7 @@ export default function ProfilePage() {
                 type="submit"
                 onClick={handleSubmit}
                 disabled={saving}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium"
+                className="bg-[#064431] hover:bg-green-700 text-white px-6 py-2 rounded font-medium"
               >
                 {saving ? 'Guardando...' : 'Guardar Cambios'}
               </button>

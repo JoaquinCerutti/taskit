@@ -98,11 +98,6 @@ export default function CrearNovedadPage() {
             <p className="text-sm text-gray-500">Publicá una nueva novedad para el hotel</p>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/novedades">
-              <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold">
-                Volver
-              </button>
-            </Link>
             <UserHeader />
           </div>
         </div>
@@ -171,7 +166,7 @@ export default function CrearNovedadPage() {
             </button>
             <button
               type="submit"
-              className="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-full font-semibold"
+              className="bg-[#064431] hover:bg-green-800 text-white px-6 py-2 rounded-full font-semibold"
               disabled={loading}
             >
               {loading ? 'Creando...' : 'Crear novedad'}

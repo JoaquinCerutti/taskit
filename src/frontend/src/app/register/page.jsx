@@ -146,31 +146,41 @@ export default function RegisterPage() {
 
           {/* Campos */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-            {[
-              { label: 'Nombre', name: 'nombre' },
-              { label: 'Apellido', name: 'apellido' },
-              { label: 'Documento', name: 'documento' },
-              { label: 'Dirección', name: 'direccion' },
-              { label: 'Email personal', name: 'emailPersonal', type: 'email' },
-              { label: 'Email corporativo', name: 'emailCorporativo', type: 'email' },
-              { label: 'Teléfono', name: 'telefono' },
-              { label: 'Usuario', name: 'username' },
-              { label: 'Contraseña', name: 'password', type: 'password' },
-            ].map(({ label, name, type = 'text' }) => (
-              <div key={name}>
-                <label className="block text-sm font-medium mb-1">{label}</label>
-                <input
-                  name={name}
-                  type={type}
-                  onChange={handleChange}
-                  placeholder={`Ingresar ${label.toLowerCase()}`}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-                {errors[name] && <p className="text-sm text-red-600 mt-1">{errors[name]}</p>}
-              </div>
-            ))}
-
-            {/* Género */}
+            {/* Fila 1 */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Nombre</label>
+              <input
+                name="nombre"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar nombre"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.nombre && <p className="text-sm text-red-600 mt-1">{errors.nombre}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Apellido</label>
+              <input
+                name="apellido"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar apellido"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.apellido && <p className="text-sm text-red-600 mt-1">{errors.apellido}</p>}
+            </div>
+            {/* Fila 2 */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Documento</label>
+              <input
+                name="documento"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar documento"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.documento && <p className="text-sm text-red-600 mt-1">{errors.documento}</p>}
+            </div>
             <div>
               <label className="block text-sm font-medium mb-1">Género</label>
               <select
@@ -185,9 +195,76 @@ export default function RegisterPage() {
               </select>
               {errors.genero && <p className="text-sm text-red-600 mt-1">{errors.genero}</p>}
             </div>
-
-          
-            {/* Rol */}
+            {/* Fila 3 */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Dirección</label>
+              <input
+                name="direccion"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar dirección"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.direccion && <p className="text-sm text-red-600 mt-1">{errors.direccion}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Teléfono</label>
+              <input
+                name="telefono"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar teléfono"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.telefono && <p className="text-sm text-red-600 mt-1">{errors.telefono}</p>}
+            </div>
+            {/* Fila 4 */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Email personal</label>
+              <input
+                name="emailPersonal"
+                type="email"
+                onChange={handleChange}
+                placeholder="Ingresar email personal"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.emailPersonal && <p className="text-sm text-red-600 mt-1">{errors.emailPersonal}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Email corporativo</label>
+              <input
+                name="emailCorporativo"
+                type="email"
+                onChange={handleChange}
+                placeholder="Ingresar email corporativo"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.emailCorporativo && <p className="text-sm text-red-600 mt-1">{errors.emailCorporativo}</p>}
+            </div>
+            {/* Fila 5 */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Usuario</label>
+              <input
+                name="username"
+                type="text"
+                onChange={handleChange}
+                placeholder="Ingresar usuario"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.username && <p className="text-sm text-red-600 mt-1">{errors.username}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Contraseña</label>
+              <input
+                name="password"
+                type="password"
+                onChange={handleChange}
+                placeholder="Ingresar contraseña"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
+            </div>
+            {/* Fila 6 */}
             <div>
               <label className="block text-sm font-medium mb-1">Rol</label>
               <select
@@ -203,7 +280,6 @@ export default function RegisterPage() {
               </select>
               {errors.rol && <p className="text-sm text-red-600 mt-1">{errors.rol}</p>}
             </div>
-
           </div>
         </form>
 
@@ -211,14 +287,14 @@ export default function RegisterPage() {
           <button
             type="submit"
             onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-medium transition"
+            className="bg-[#064431] hover:bg-green-700 text-white py-2 px-6 rounded-lg font-medium transition"
           >
             Crear usuario
           </button>
           <button
             type="button"
             onClick={() => router.push('/main')}
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
+            className="bg-[#992828] hover:bg-red-600 text-white py-2 px-6 rounded-lg font-medium transition"
           >
             Cancelar
           </button>

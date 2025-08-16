@@ -99,7 +99,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full bg-black hover:bg-gray-900 text-white font-medium py-2 rounded-lg transition duration-200"
+            className="w-full bg-[#064431] hover:bg-gray-900 text-white font-medium py-2 rounded-lg transition duration-200"
           >
             Continuar
           </button>

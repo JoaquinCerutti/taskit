@@ -74,7 +74,7 @@ export default function NovedadesPage() {
           <div className="flex items-center gap-4">
             <Link href="/novedades/crear">
               <button
-                className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
+                className="bg-[#064431] hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
               >
                 Crear novedad
               </button>

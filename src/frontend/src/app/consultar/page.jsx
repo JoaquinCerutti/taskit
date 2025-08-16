@@ -70,7 +70,7 @@ export default function UsuariosPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('../register')}
-              className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
+              className="bg-[#064431] hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold"
             >
               Nuevo Usuario
             </button>
@@ -111,7 +111,7 @@ export default function UsuariosPage() {
                 }}
                 className="border rounded px-2 py-1"
               >
-                <option value="nombre">Nombre</option>
+                <option value="nombre">Nombre y Apellido</option>
                 <option value="email">Email</option>
                 <option value="username">Usuario</option>
                 <option value="rol">Rol</option>
@@ -138,8 +138,8 @@ export default function UsuariosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left border-b text-gray-600">
-                <th className="py-2">Nombre</th>
-                <th>Email</th>
+                <th className="py-2">Nombre y Apellido</th>
+                <th>Email Corporativo</th>
                 <th>Usuario</th>
                 <th>Rol</th>
                 <th>Consultar</th>

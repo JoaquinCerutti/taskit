@@ -36,13 +36,28 @@ export default function NovedadesPage() {
       }
     };
     fetchNovedades();
+
+    // Recargar novedades cuando la pestaña vuelve a estar activa
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setLoading(true);
+        fetchNovedades();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
-  // Filtro visual (puedes mejorar según tus categorías reales)
+  // Filtro visual adaptado a múltiples categorías
   const novedadesFiltradas = filtroActivo === 'Todas'
     ? novedades
     : novedades.filter(n =>
-        n.categoria?.nombre?.toLowerCase().includes(filtroActivo.toLowerCase()) ||
+        (n.categorias?.some(catRel =>
+          catRel.categoriaNovedad?.nombre?.toLowerCase().includes(filtroActivo.toLowerCase())
+        )) ||
         n.titulo?.toLowerCase().includes(filtroActivo.toLowerCase())
       );
 
@@ -118,17 +133,19 @@ export default function NovedadesPage() {
                   className="w-20 h-20 object-contain mb-4"
                 />
                 <div className="text-gray-500 text-sm mb-2">
-                  {novedad.fecCreacion
+                  {novedad.fecCreacion && !isNaN(new Date(novedad.fecCreacion).getTime())
                     ? new Date(novedad.fecCreacion).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })
                     : ''}
                 </div>
                 <div className="font-semibold text-lg text-center text-gray-800">{novedad.titulo}</div>
-                <div className="text-xs text-gray-500 mt-2">{novedad.categoria?.nombre}</div>
+                <div className="text-xs text-gray-500 mt-2">
+                  {novedad.categorias?.map(catRel => catRel.categoriaNovedad?.nombre).filter(Boolean).join(', ')}
+                </div>
               </div>
             ))
           ) : (
             <div className="col-span-full text-center text-gray-400 py-12">
-              No hay novedades para mostrar.
+              No hay novedades para mostrar
             </div>
           )}
         </div>

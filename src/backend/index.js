@@ -13,6 +13,7 @@ import unidadRoutes from './routes/unidadRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import roleRoutes from './routes/roleRoutes.js';
 import notificacionRoutes from './routes/notificacionRoutes.js';
+import novedadRoutes from './routes/novedadRoutes.js';
 
 
 
@@ -52,6 +53,7 @@ app.use('/api/unidades', unidadRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/notificaciones', notificacionRoutes);
+app.use('/api/novedades', novedadRoutes);
 
 
 

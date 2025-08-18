@@ -29,6 +29,7 @@ model Role {
 
   sesiones   Sesion[]     @relation("RoleSesiones")
   rolUsuario RolUsuario[] @relation("RoleRolUsuario")
+  novedadesDestinatario NovedadDestinatarioRol[] @relation("RoleNovedadDestinatario")
 
   @@map("roles")
 }
@@ -250,15 +251,14 @@ model Novedad {
   fecCreacion           DateTime @default(now()) @map("fec_creacion")
   idUsuarioModificacion Int?     @map("id_usuario_modificacion")
   fecModificacion       DateTime @default(now()) @map("fec_modificacion")
-  idSectorDestino       Int      @map("id_sector_destino")
-  idCategoriaNovedad    Int      @map("id_categoria_novedad")
 
   creador     Usuario          @relation("NovedadCreador", fields: [idUsuarioCreador], references: [idUsuario])
   modificador Usuario?         @relation("NovedadModificador", fields: [idUsuarioModificacion], references: [idUsuario])
   mensajes    MensajeNovedad[] @relation("NovedadMensajes")
   archivos    Archivo[]        @relation("NovedadArchivos")
-  sector      Sector           @relation("SectorNovedades", fields: [idSectorDestino], references: [idSector])
-  categoria   CategoriaNovedad @relation("CategoriaNovedadNovedades", fields: [idCategoriaNovedad], references: [idCategoriaNovedad])
+
+  categorias   CategoriaNovedadXnovedad[] @relation("NovedadCategorias")
+  destinatarios NovedadDestinatarioRol[]  @relation("NovedadDestinatarios")
 
   @@map("novedades")
 }
@@ -313,18 +313,36 @@ model TipoTicket {
   @@map("tipos_ticket")
 }
 
-model Sector {
-  idSector   Int       @id @default(autoincrement()) @map("id_sector")
-  nombre     String    @unique @map("nombre")
-  novedades  Novedad[] @relation("SectorNovedades")
-
-  @@map("sectores")
-}
-
 model CategoriaNovedad {
   idCategoriaNovedad Int       @id @default(autoincrement()) @map("id_categoria_novedad")
   nombre             String    @unique @map("nombre")
-  novedades          Novedad[] @relation("CategoriaNovedadNovedades")
+  novedades          CategoriaNovedadXnovedad[] @relation("CategoriaNovedadNovedad")
 
   @@map("categorias_novedad")
+}
+
+/// Tabla intermedia para Novedad <-> CategoriaNovedad (muchos a muchos)
+model CategoriaNovedadXnovedad {
+  id                Int              @id @default(autoincrement())
+  novedadId         Int              @map("id_novedad")
+  categoriaNovedadId Int             @map("id_categoria_novedad")
+
+  novedad           Novedad          @relation("NovedadCategorias", fields: [novedadId], references: [idNovedad])
+  categoriaNovedad  CategoriaNovedad @relation("CategoriaNovedadNovedad", fields: [categoriaNovedadId], references: [idCategoriaNovedad])
+
+  @@unique([novedadId, categoriaNovedadId])
+  @@map("categoria_novedad_x_novedad")
+}
+
+/// Tabla intermedia para Novedad <-> Role (destinatarios, muchos a muchos)
+model NovedadDestinatarioRol {
+  id        Int   @id @default(autoincrement())
+  novedadId Int   @map("id_novedad")
+  rolId     Int   @map("id_rol")
+
+  novedad   Novedad @relation("NovedadDestinatarios", fields: [novedadId], references: [idNovedad])
+  rol       Role    @relation("RoleNovedadDestinatario", fields: [rolId], references: [idRol])
+
+  @@unique([novedadId, rolId])
+  @@map("novedad_destinatario_rol")
 }

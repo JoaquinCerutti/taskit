@@ -1,5 +1,17 @@
 import prisma from '../prisma/client.js';
 
+// Convierte BigInt a string en todo el objeto
+function replacerBigInt(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(replacerBigInt);
+  } else if (obj && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, typeof v === 'bigint' ? v.toString() : replacerBigInt(v)])
+    );
+  }
+  return obj;
+}
+
 // Obtener todas las novedades
 export const getNovedades = async (req, res) => {
   try {
@@ -7,14 +19,19 @@ export const getNovedades = async (req, res) => {
       include: {
         creador: true,
         modificador: true,
-        sector: true,
-        categoria: true,
         mensajes: true,
         archivos: true,
+        categorias: {
+          include: { categoriaNovedad: true }
+        },
+        destinatarios: {
+          include: { rol: true }
+        }
       },
     });
-    res.json(novedades);
+    res.json(replacerBigInt(novedades));
   } catch (error) {
+    console.error('Error en getNovedades:', error);
     res.status(500).json({ error: 'Error al obtener novedades' });
   }
 };
@@ -28,14 +45,18 @@ export const getNovedadById = async (req, res) => {
       include: {
         creador: true,
         modificador: true,
-        sector: true,
-        categoria: true,
         mensajes: true,
         archivos: true,
+        categorias: {
+          include: { categoriaNovedad: true }
+        },
+        destinatarios: {
+          include: { rol: true }
+        }
       },
     });
     if (!novedad) return res.status(404).json({ error: 'Novedad no encontrada' });
-    res.json(novedad);
+    res.json(replacerBigInt(novedad));
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener la novedad' });
   }
@@ -48,20 +69,34 @@ export const createNovedad = async (req, res) => {
       titulo,
       descripcion,
       idUsuarioCreador,
-      idSectorDestino,
-      idCategoriaNovedad,
+      categoriasIds,
+      destinatariosIds
     } = req.body;
+
     const nuevaNovedad = await prisma.novedad.create({
       data: {
         titulo,
         descripcion,
-        idUsuarioCreador,
-        idSectorDestino,
-        idCategoriaNovedad,
+        creador: { connect: { idUsuario: idUsuarioCreador } },
+        categorias: {
+          create: categoriasIds?.map(id => ({
+            categoriaNovedad: { connect: { idCategoriaNovedad: id } }
+          }))
+        },
+        destinatarios: {
+          create: destinatariosIds?.map(id => ({
+            rol: { connect: { idRol: id } }
+          }))
+        }
       },
+      include: {
+        categorias: { include: { categoriaNovedad: true } },
+        destinatarios: { include: { rol: true } }
+      }
     });
     res.status(201).json(nuevaNovedad);
   } catch (error) {
+    console.error('Error al crear novedad:', error);
     res.status(500).json({ error: 'Error al crear la novedad' });
   }
 };
@@ -74,19 +109,40 @@ export const updateNovedad = async (req, res) => {
       titulo,
       descripcion,
       idUsuarioModificacion,
-      idSectorDestino,
-      idCategoriaNovedad,
+      categoriasIds,
+      destinatariosIds
     } = req.body;
+
+    // Primero, elimina las relaciones actuales
+    await prisma.categoriaNovedadXnovedad.deleteMany({
+      where: { novedadId: Number(id) }
+    });
+    await prisma.novedadDestinatarioRol.deleteMany({
+      where: { novedadId: Number(id) }
+    });
+
     const novedadActualizada = await prisma.novedad.update({
       where: { idNovedad: Number(id) },
       data: {
         titulo,
         descripcion,
         idUsuarioModificacion,
-        idSectorDestino,
-        idCategoriaNovedad,
         fecModificacion: new Date(),
+        categorias: {
+          create: categoriasIds?.map(cid => ({
+            categoriaNovedad: { connect: { idCategoriaNovedad: cid } }
+          }))
+        },
+        destinatarios: {
+          create: destinatariosIds?.map(rid => ({
+            rol: { connect: { idRol: rid } }
+          }))
+        }
       },
+      include: {
+        categorias: { include: { categoriaNovedad: true } },
+        destinatarios: { include: { rol: true } }
+      }
     });
     res.json(novedadActualizada);
   } catch (error) {
@@ -106,3 +162,4 @@ export const deleteNovedad = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar la novedad' });
   }
 };
+

@@ -7,17 +7,12 @@ import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import api from '@/utils/api';
 
-// Mock filtros
-const filtros = [
-  'Todas', 'Urgente', 'Arribos', 'Mantenimiento', 'Housekeeping',
-  'Cocina y Bar', 'Recepcion', 'Olvidos', 'RRHH'
-];
-
 const UserHeader = dynamic(() => import('@/components/UserHeader'), { ssr: false });
 
 export default function NovedadesPage() {
   const router = useRouter();
-  const [filtroActivo, setFiltroActivo] = useState('Todas');
+  const [categorias, setCategorias] = useState([]);
+  const [filtrosActivos, setFiltrosActivos] = useState(['Todas']);
   const [novedades, setNovedades] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,15 +46,54 @@ export default function NovedadesPage() {
     };
   }, []);
 
-  // Filtro visual adaptado a múltiples categorías
-  const novedadesFiltradas = filtroActivo === 'Todas'
-    ? novedades
-    : novedades.filter(n =>
-        (n.categorias?.some(catRel =>
-          catRel.categoriaNovedad?.nombre?.toLowerCase().includes(filtroActivo.toLowerCase())
-        )) ||
-        n.titulo?.toLowerCase().includes(filtroActivo.toLowerCase())
-      );
+  useEffect(() => {
+    // Traer categorías desde la API
+    const fetchCategorias = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await api.get('/categorias-novedad', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // res.data debe ser un array de objetos con al menos la propiedad 'nombre'
+        setCategorias(res.data || []);
+      } catch (err) {
+        setCategorias([]);
+      }
+    };
+    fetchCategorias();
+  }, []);
+
+  // Maneja la selección múltiple de filtros
+  const handleFiltroClick = (filtro) => {
+    if (filtro === 'Todas') {
+      setFiltrosActivos(['Todas']);
+    } else {
+      if (filtrosActivos.includes(filtro)) {
+        const nuevosFiltros = filtrosActivos.filter(f => f !== filtro);
+        setFiltrosActivos(nuevosFiltros.length === 0 ? ['Todas'] : nuevosFiltros);
+      } else {
+        setFiltrosActivos(
+          filtrosActivos.filter(f => f !== 'Todas').concat(filtro)
+        );
+      }
+    }
+  };
+
+  // Filtrado adaptado a múltiples categorías
+  const novedadesFiltradas =
+    filtrosActivos.includes('Todas')
+      ? novedades
+      : novedades.filter(n =>
+          filtrosActivos.some(filtro =>
+            (n.categorias?.some(catRel =>
+              catRel.categoriaNovedad?.nombre?.toLowerCase().includes(filtro.toLowerCase())
+            )) ||
+            n.titulo?.toLowerCase().includes(filtro.toLowerCase())
+          )
+        );
+
+  // Reemplaza 'filtros' por los nombres de las categorías traídas de la API
+  const filtros = ['Todas', ...categorias.map(cat => cat.nombre)];
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-inter">
@@ -103,9 +137,9 @@ export default function NovedadesPage() {
           {filtros.map((filtro) => (
             <button
               key={filtro}
-              onClick={() => setFiltroActivo(filtro)}
+              onClick={() => handleFiltroClick(filtro)}
               className={`px-4 py-2 rounded-full border text-sm font-semibold transition
-                ${filtroActivo === filtro
+                ${filtrosActivos.includes(filtro)
                   ? 'bg-green-100 text-green-800 border-green-300 shadow'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}
               `}
@@ -127,9 +161,12 @@ export default function NovedadesPage() {
                 key={novedad.idNovedad}
                 className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col items-center shadow-sm min-h-[220px]"
               >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/6/6e/Holiday_Inn_Logo.svg"
+                {/* Usa el logo proporcionado */}
+                <Image
+                  src="/holiday-logo-simple.png"
                   alt="Holiday Inn"
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-contain mb-4"
                 />
                 <div className="text-gray-500 text-sm mb-2">

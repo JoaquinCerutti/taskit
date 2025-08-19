@@ -163,3 +163,13 @@ export const deleteNovedad = async (req, res) => {
   }
 };
 
+// Obtener todas las categorías de novedad
+export const getCategoriasNovedad = async (req, res) => {
+  try {
+    const categorias = await prisma.categoriaNovedad.findMany();
+    res.json(categorias);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener categorías de novedad' });
+  }
+};
+

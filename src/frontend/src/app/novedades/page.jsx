@@ -51,10 +51,10 @@ export default function NovedadesPage() {
     const fetchCategorias = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await api.get('/categorias-novedad', {
+        // Usa la ruta correcta según tu backend
+        const res = await api.get('/novedades/categorias-novedad', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        // res.data debe ser un array de objetos con al menos la propiedad 'nombre'
         setCategorias(res.data || []);
       } catch (err) {
         setCategorias([]);

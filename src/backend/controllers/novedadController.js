@@ -1,14 +1,30 @@
 import prisma from '../prisma/client.js';
 
-// Convierte BigInt a string en todo el objeto
+
+// Convierte BigInt a string recursivamente SIN romper Date ni otras clases
 function replacerBigInt(obj) {
+  if (obj === null || obj === undefined) return obj;
+
+  if (typeof obj === 'bigint') return obj.toString();
+
   if (Array.isArray(obj)) {
-    return obj.map(replacerBigInt);
-  } else if (obj && typeof obj === 'object') {
-    return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, typeof v === 'bigint' ? v.toString() : replacerBigInt(v)])
-    );
+    return obj.map((x) => replacerBigInt(x));
   }
+
+  if (typeof obj === 'object') {
+    // NO tocar Date ni otras instancias (Map, Set, etc.)
+    if (obj instanceof Date) return obj;
+
+    // Solo transformar POJOs
+    if (obj.constructor === Object) {
+      return Object.fromEntries(
+        Object.entries(obj).map(([k, v]) => [k, replacerBigInt(v)])
+      );
+    }
+
+    return obj;
+  }
+
   return obj;
 }
 
@@ -21,14 +37,12 @@ export const getNovedades = async (req, res) => {
         modificador: true,
         mensajes: true,
         archivos: true,
-        categorias: {
-          include: { categoriaNovedad: true }
-        },
-        destinatarios: {
-          include: { rol: true }
-        }
+        categorias: { include: { categoriaNovedad: true } },
+        destinatarios: { include: { rol: true } }
       },
+      orderBy: { fecCreacion: 'desc' } // 👈 orden inverso
     });
+
     res.json(replacerBigInt(novedades));
   } catch (error) {
     console.error('Error en getNovedades:', error);
@@ -73,28 +87,42 @@ export const createNovedad = async (req, res) => {
       destinatariosIds
     } = req.body;
 
-    const nuevaNovedad = await prisma.novedad.create({
-      data: {
-        titulo,
-        descripcion,
-        creador: { connect: { idUsuario: idUsuarioCreador } },
+    if (!titulo || !descripcion || !idUsuarioCreador) {
+      return res.status(400).json({ error: 'titulo, descripcion e idUsuarioCreador son obligatorios.' });
+    }
+
+    const catIds = Array.isArray(categoriasIds) ? categoriasIds.map(Number).filter(Number.isFinite) : [];
+    const rolIds = Array.isArray(destinatariosIds) ? destinatariosIds.map(Number).filter(Number.isFinite) : [];
+
+    const data = {
+      titulo,
+      descripcion,
+      creador: { connect: { idUsuario: Number(idUsuarioCreador) } },
+      ...(catIds.length > 0 && {
         categorias: {
-          create: categoriasIds?.map(id => ({
+          create: catIds.map(id => ({
             categoriaNovedad: { connect: { idCategoriaNovedad: id } }
           }))
-        },
+        }
+      }),
+      ...(rolIds.length > 0 && {
         destinatarios: {
-          create: destinatariosIds?.map(id => ({
+          create: rolIds.map(id => ({
             rol: { connect: { idRol: id } }
           }))
         }
-      },
+      })
+    };
+
+    const nuevaNovedad = await prisma.novedad.create({
+      data,
       include: {
         categorias: { include: { categoriaNovedad: true } },
-        destinatarios: { include: { rol: true } }
+        destinatarios: { include: { rol: true } },
+        creador: true
       }
     });
-    res.status(201).json(nuevaNovedad);
+    res.status(201).json(replacerBigInt(nuevaNovedad));
   } catch (error) {
     console.error('Error al crear novedad:', error);
     res.status(500).json({ error: 'Error al crear la novedad' });
@@ -113,42 +141,56 @@ export const updateNovedad = async (req, res) => {
       destinatariosIds
     } = req.body;
 
-    // Primero, elimina las relaciones actuales
-    await prisma.categoriaNovedadXnovedad.deleteMany({
-      where: { novedadId: Number(id) }
-    });
-    await prisma.novedadDestinatarioRol.deleteMany({
-      where: { novedadId: Number(id) }
+    const catIds = Array.isArray(categoriasIds) ? categoriasIds.map(Number).filter(Number.isFinite) : [];
+    const rolIds = Array.isArray(destinatariosIds) ? destinatariosIds.map(Number).filter(Number.isFinite) : [];
+
+    // Limpiar pivotes y recrear dentro de una transacción
+    const novedadActualizada = await prisma.$transaction(async (tx) => {
+      await tx.categoriaNovedadXnovedad.deleteMany({ where: { novedadId: Number(id) } });
+      await tx.novedadDestinatarioRol.deleteMany({ where: { novedadId: Number(id) } });
+
+      await tx.novedad.update({
+        where: { idNovedad: Number(id) },
+        data: {
+          ...(titulo !== undefined && { titulo }),
+          ...(descripcion !== undefined && { descripcion }),
+          ...(idUsuarioModificacion && { modificador: { connect: { idUsuario: Number(idUsuarioModificacion) } } }),
+          fecModificacion: new Date()
+        }
+      });
+
+      if (catIds.length > 0) {
+        await tx.categoriaNovedadXnovedad.createMany({
+          data: catIds.map(cid => ({ novedadId: Number(id), categoriaNovedadId: cid })),
+          skipDuplicates: true
+        });
+      }
+
+      if (rolIds.length > 0) {
+        await tx.novedadDestinatarioRol.createMany({
+          data: rolIds.map(rid => ({ novedadId: Number(id), rolId: rid })),
+          skipDuplicates: true
+        });
+      }
+
+      return tx.novedad.findUnique({
+        where: { idNovedad: Number(id) },
+        include: {
+          categorias: { include: { categoriaNovedad: true } },
+          destinatarios: { include: { rol: true } },
+          creador: true,
+          modificador: true
+        }
+      });
     });
 
-    const novedadActualizada = await prisma.novedad.update({
-      where: { idNovedad: Number(id) },
-      data: {
-        titulo,
-        descripcion,
-        idUsuarioModificacion,
-        fecModificacion: new Date(),
-        categorias: {
-          create: categoriasIds?.map(cid => ({
-            categoriaNovedad: { connect: { idCategoriaNovedad: cid } }
-          }))
-        },
-        destinatarios: {
-          create: destinatariosIds?.map(rid => ({
-            rol: { connect: { idRol: rid } }
-          }))
-        }
-      },
-      include: {
-        categorias: { include: { categoriaNovedad: true } },
-        destinatarios: { include: { rol: true } }
-      }
-    });
-    res.json(novedadActualizada);
+    res.json(replacerBigInt(novedadActualizada));
   } catch (error) {
+    console.error('Error al actualizar la novedad:', error);
     res.status(500).json({ error: 'Error al actualizar la novedad' });
   }
 };
+
 
 // Eliminar una novedad
 export const deleteNovedad = async (req, res) => {

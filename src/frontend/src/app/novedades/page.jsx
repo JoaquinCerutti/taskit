@@ -1,11 +1,13 @@
+// src/app/novedades/page.jsx
 'use client';
 
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import api from '@/utils/api';
+import NovedadCard from '@/components/NovedadCard';
 
 const UserHeader = dynamic(() => import('@/components/UserHeader'), { ssr: false });
 
@@ -16,15 +18,26 @@ export default function NovedadesPage() {
   const [novedades, setNovedades] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // --- helpers ---
+  const normalizar = (str) =>
+    (str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  // --- fetch novedades ---
   useEffect(() => {
     const fetchNovedades = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem('token');
         const res = await api.get('/novedades', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setNovedades(res.data);
-      } catch (err) {
+        setNovedades(Array.isArray(res.data) ? res.data : []);
+      } catch {
         setNovedades([]);
       } finally {
         setLoading(false);
@@ -32,79 +45,74 @@ export default function NovedadesPage() {
     };
     fetchNovedades();
 
-    // Recargar novedades cuando la pestaña vuelve a estar activa
+    // recargar cuando vuelve la pestaña
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        setLoading(true);
         fetchNovedades();
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
+  // --- fetch categorías ---
   useEffect(() => {
-    // Traer categorías desde la API
     const fetchCategorias = async () => {
       try {
         const token = localStorage.getItem('token');
-        // Usa la ruta correcta según tu backend
         const res = await api.get('/novedades/categorias-novedad', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCategorias(res.data || []);
-      } catch (err) {
+        setCategorias(Array.isArray(res.data) ? res.data : []);
+      } catch {
         setCategorias([]);
       }
     };
     fetchCategorias();
   }, []);
 
-  // Maneja la selección múltiple de filtros
+  // --- filtros ---
+  const filtros = useMemo(
+    () => ['Todas', ...categorias.map((cat) => cat.nombre)],
+    [categorias]
+  );
+
   const handleFiltroClick = (filtro) => {
     if (filtro === 'Todas') {
       setFiltrosActivos(['Todas']);
+      return;
+    }
+    if (filtrosActivos.includes(filtro)) {
+      const nuevos = filtrosActivos.filter((f) => f !== filtro);
+      setFiltrosActivos(nuevos.length === 0 ? ['Todas'] : nuevos);
     } else {
-      if (filtrosActivos.includes(filtro)) {
-        const nuevosFiltros = filtrosActivos.filter(f => f !== filtro);
-        setFiltrosActivos(nuevosFiltros.length === 0 ? ['Todas'] : nuevosFiltros);
-      } else {
-        setFiltrosActivos(
-          filtrosActivos.filter(f => f !== 'Todas').concat(filtro)
-        );
-      }
+      setFiltrosActivos(filtrosActivos.filter((f) => f !== 'Todas').concat(filtro));
     }
   };
 
-  // Utilidad para normalizar strings (quita tildes, pasa a minúsculas y quita espacios extra)
-  function normalizar(str) {
-    return (str || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
+  // --- filtrado + orden (más nuevas primero) ---
+  const novedadesFiltradas = useMemo(() => {
+    if (filtrosActivos.includes('Todas')) return novedades;
+    return novedades.filter((n) =>
+      filtrosActivos.some(
+        (filtro) =>
+          n.categorias?.some(
+            (c) => normalizar(c?.categoriaNovedad?.nombre) === normalizar(filtro)
+          ) || normalizar(n.titulo).includes(normalizar(filtro))
+      )
+    );
+  }, [novedades, filtrosActivos]);
 
-  // Filtrado adaptado a múltiples categorías
-  const novedadesFiltradas =
-    filtrosActivos.includes('Todas')
-      ? novedades
-      : novedades.filter(n =>
-          filtrosActivos.some(filtro =>
-            (n.categorias?.some(catRel =>
-              normalizar(catRel.categoriaNovedad?.nombre) === normalizar(filtro)
-            )) ||
-            normalizar(n.titulo).includes(normalizar(filtro))
-          )
-        );
+  const novedadesOrdenadas = useMemo(() => {
+    return [...novedadesFiltradas].sort((a, b) => {
+      const da = new Date(a.fecCreacion).getTime() || 0;
+      const db = new Date(b.fecCreacion).getTime() || 0;
+      if (db !== da) return db - da;                 // fecha desc
+      return (b.idNovedad || 0) - (a.idNovedad || 0); // backup por id
+    });
+  }, [novedadesFiltradas]);
 
-  // Reemplaza 'filtros' por los nombres de las categorías traídas de la API
-  const filtros = ['Todas', ...categorias.map(cat => cat.nombre)];
-
+  // --- UI ---
   return (
     <div className="flex min-h-screen bg-gray-100 font-inter">
       {/* Sidebar */}
@@ -123,7 +131,7 @@ export default function NovedadesPage() {
         <div className="text-right text-xs text-gray-400 mt-8">© 2025 TaskIT</div>
       </aside>
 
-      {/* Main content */}
+      {/* Main */}
       <main className="flex-1 p-10">
         <div className="flex justify-between items-center mb-6">
           <div>
@@ -132,9 +140,7 @@ export default function NovedadesPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/novedades/crear">
-              <button
-                className="bg-[#064431] hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2"
-              >
+              <button className="bg-[#064431] hover:bg-green-800 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
                 Crear novedad
               </button>
             </Link>
@@ -159,37 +165,14 @@ export default function NovedadesPage() {
           ))}
         </div>
 
-        {/* Grilla de novedades */}
+        {/* Grilla */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
             <div className="col-span-full text-center text-gray-400 py-12">
               Cargando novedades...
             </div>
-          ) : novedadesFiltradas.length > 0 ? (
-            novedadesFiltradas.map(novedad => (
-              <div
-                key={novedad.idNovedad}
-                className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col items-center shadow-sm min-h-[220px]"
-              >
-                {/* Usa el logo proporcionado */}
-                <Image
-                  src="/holiday-logo-simple.png"
-                  alt="Holiday Inn"
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 object-contain mb-4"
-                />
-                <div className="text-gray-500 text-sm mb-2">
-                  {novedad.fecCreacion && !isNaN(new Date(novedad.fecCreacion).getTime())
-                    ? new Date(novedad.fecCreacion).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' })
-                    : ''}
-                </div>
-                <div className="font-semibold text-lg text-center text-gray-800">{novedad.titulo}</div>
-                <div className="text-xs text-gray-500 mt-2">
-                  {novedad.categorias?.map(catRel => catRel.categoriaNovedad?.nombre).filter(Boolean).join(', ')}
-                </div>
-              </div>
-            ))
+          ) : novedadesOrdenadas.length > 0 ? (
+            novedadesOrdenadas.map((n) => <NovedadCard key={n.idNovedad} novedad={n} />)
           ) : (
             <div className="col-span-full text-center text-gray-400 py-12">
               No hay novedades para mostrar

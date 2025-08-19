@@ -79,6 +79,16 @@ export default function NovedadesPage() {
     }
   };
 
+  // Utilidad para normalizar strings (quita tildes, pasa a minúsculas y quita espacios extra)
+  function normalizar(str) {
+    return (str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   // Filtrado adaptado a múltiples categorías
   const novedadesFiltradas =
     filtrosActivos.includes('Todas')
@@ -86,9 +96,9 @@ export default function NovedadesPage() {
       : novedades.filter(n =>
           filtrosActivos.some(filtro =>
             (n.categorias?.some(catRel =>
-              catRel.categoriaNovedad?.nombre?.toLowerCase().includes(filtro.toLowerCase())
+              normalizar(catRel.categoriaNovedad?.nombre) === normalizar(filtro)
             )) ||
-            n.titulo?.toLowerCase().includes(filtro.toLowerCase())
+            normalizar(n.titulo).includes(normalizar(filtro))
           )
         );
 

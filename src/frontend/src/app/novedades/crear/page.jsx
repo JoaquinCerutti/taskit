@@ -1,7 +1,7 @@
 // src/app/novedades/crear/page.jsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -28,6 +28,67 @@ const SEED_CATEGORIAS = [
   { idCategoriaNovedad: 7, nombre: 'Olvidos' },
   { idCategoriaNovedad: 8, nombre: 'RRHH' },
 ];
+
+function DropdownMultiSelect({ label, items, value, onChange, placeholder }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Cierra el dropdown si se hace click fuera
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    if (open) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  const selectedLabels = items.filter(i => value.includes(i.id)).map(i => i.label);
+  const display = selectedLabels.length === 0
+    ? placeholder
+    : selectedLabels.length === 1
+      ? selectedLabels[0]
+      : `${selectedLabels[0]} +${selectedLabels.length - 1}`;
+
+  return (
+    <div className="relative" ref={ref}>
+      <label className="block text-sm font-semibold mb-1">{label}</label>
+      <button
+        type="button"
+        className="bg-[#064431] text-white font-semibold px-6 py-2 rounded focus:outline-none flex items-center gap-2"
+        onClick={() => setOpen(o => !o)}
+      >
+        {display}
+        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded shadow-lg max-h-56 overflow-auto">
+          {items.map(item => (
+            <label
+              key={item.id}
+              className="flex items-center px-4 py-2 hover:bg-green-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={value.includes(item.id)}
+                onChange={e => {
+                  if (e.target.checked) {
+                    onChange([...value, item.id]);
+                  } else {
+                    onChange(value.filter(v => v !== item.id));
+                  }
+                }}
+                className="mr-2 accent-green-700"
+              />
+              {item.label}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CrearNovedadPage() {
   const router = useRouter();
@@ -144,49 +205,49 @@ export default function CrearNovedadPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow border border-gray-200 p-6 max-w-3xl">
           {/* Título */}
           <div className="mb-5">
-            <label className="block text-sm font-semibold mb-1">Título *</label>
+            <label className="block text-sm font-semibold mb-1">Título </label>
             <input
               value={titulo}
               onChange={e => setTitulo(e.target.value)}
               required
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-              placeholder='Ej: "Corte programado de agua caliente en Ala Norte"'
+              placeholder='Ingrese título de la novedad'
             />
           </div>
 
           {/* Descripción */}
           <div className="mb-5">
-            <label className="block text-sm font-semibold mb-1">Descripción *</label>
+            <label className="block text-sm font-semibold mb-1">Descripción </label>
             <textarea
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               required
               rows={5}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
-              placeholder="Agregá detalles relevantes para el equipo..."
+              placeholder="Ingrese descripción de la novedad"
             />
           </div>
 
-          {/* Categorías (chips verdes + Todos) */}
-          <div className="mb-6">
-            <MultiSelectChips
-              label="Categorías *"
-              items={categorias.map(c => ({ id: c.idCategoriaNovedad, label: c.nombre }))}
-              value={catsSel}
-              onChange={setCatsSel}
-              includeAll
-            />
-          </div>
-
-          {/* Destinatarios (chips verdes + Todos) */}
-          <div className="mb-6">
-            <MultiSelectChips
-              label="Destinatarios *"
-              items={roles.map(r => ({ id: r.idRol, label: r.nombreRol }))}
-              value={rolesSel}
-              onChange={setRolesSel}
-              includeAll
-            />
+          {/* Destinatarios y Categoría en línea */}
+          <div className="flex gap-12 mb-6">
+            <div className="flex-1">
+              <DropdownMultiSelect
+                label="Destinatarios *"
+                items={roles.map(r => ({ id: r.idRol, label: r.nombreRol }))}
+                value={rolesSel}
+                onChange={setRolesSel}
+                placeholder="Todos"
+              />
+            </div>
+            <div className="flex-1">
+              <DropdownMultiSelect
+                label="Categoría *"
+                items={categorias.map(c => ({ id: c.idCategoriaNovedad, label: c.nombre }))}
+                value={catsSel}
+                onChange={setCatsSel}
+                placeholder="Seleccionar"
+              />
+            </div>
           </div>
 
           {/* Autor y fecha visible */}

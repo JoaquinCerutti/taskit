@@ -12,6 +12,7 @@ export default function NovedadDetallePage({ params }) {
 
   const [novedad, setNovedad] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lectores, setLectores] = useState([]); // NUEVO
 
   useEffect(() => {
     const fetchDetalle = async () => {
@@ -22,7 +23,7 @@ export default function NovedadDetallePage({ params }) {
         });
         setNovedad(res.data);
 
-        // Marcar como leída si hay usuario
+        // Marcar como leída
         const user = JSON.parse(localStorage.getItem('user') || 'null');
         if (user?.idUsuario) {
           await api.post(
@@ -31,6 +32,12 @@ export default function NovedadDetallePage({ params }) {
             { headers: { Authorization: `Bearer ${token}` } }
           );
         }
+
+        // Obtener lectores
+        const lectoresRes = await api.get(`/novedades/${id}/lectores`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setLectores(lectoresRes.data || []);
       } catch (e) {
         console.error(e);
         setNovedad(null);
@@ -116,6 +123,11 @@ export default function NovedadDetallePage({ params }) {
                 </div>
                 <div className="text-gray-500">{roles.length ? roles.join(' · ') : '—'}</div>
               </div>
+            </div>
+
+            {/* Lectores */}
+            <div className="mt-2 text-xs text-gray-400">
+              {lectores.length} usuario{lectores.length === 1 ? '' : 's'} leyeron esta novedad
             </div>
           </div>
 

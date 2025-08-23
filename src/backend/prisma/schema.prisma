@@ -73,6 +73,7 @@ model Usuario {
   novedadesCreadas     Novedad[]      @relation("NovedadCreador")
   novedadesModificadas Novedad[]      @relation("NovedadModificador")
   notificaciones       Notificacion[] @relation("UsuarioNotificaciones")
+  lecturasNovedad      NovedadLecturaUsuario[] @relation("UsuarioLecturasNovedad")
 
   @@map("usuarios")
 }
@@ -259,6 +260,7 @@ model Novedad {
 
   categorias   CategoriaNovedadXnovedad[] @relation("NovedadCategorias")
   destinatarios NovedadDestinatarioRol[]  @relation("NovedadDestinatarios")
+  lecturas      NovedadLecturaUsuario[]   @relation("NovedadLecturas")
 
   @@map("novedades")
 }
@@ -345,4 +347,18 @@ model NovedadDestinatarioRol {
 
   @@unique([novedadId, rolId])
   @@map("novedad_destinatario_rol")
+}
+
+/// Tabla intermedia para registrar lecturas de novedades por usuario
+model NovedadLecturaUsuario {
+  id         Int      @id @default(autoincrement())
+  novedadId  Int      @map("id_novedad")
+  usuarioId  Int      @map("id_usuario")
+  fechaLectura DateTime @default(now()) @map("fecha_lectura")
+
+  novedad    Novedad  @relation("NovedadLecturas", fields: [novedadId], references: [idNovedad])
+  usuario    Usuario  @relation("UsuarioLecturasNovedad", fields: [usuarioId], references: [idUsuario])
+
+  @@unique([novedadId, usuarioId])
+  @@map("novedad_lectura_usuario")
 }

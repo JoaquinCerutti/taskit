@@ -215,3 +215,46 @@ export const getCategoriasNovedad = async (req, res) => {
   }
 };
 
+// Registrar lectura de novedad por usuario
+export const marcarNovedadLeida = async (req, res) => {
+  const { id } = req.params; // id de novedad
+  const { idUsuario } = req.body;
+  if (!idUsuario) return res.status(400).json({ error: 'idUsuario es requerido' });
+
+  try {
+    // upsert: si ya existe, no duplica
+    const lectura = await prisma.novedadLecturaUsuario.upsert({
+      where: {
+        novedadId_usuarioId: {
+          novedadId: Number(id),
+          usuarioId: Number(idUsuario)
+        }
+      },
+      update: { fechaLectura: new Date() },
+      create: {
+        novedadId: Number(id),
+        usuarioId: Number(idUsuario),
+        fechaLectura: new Date()
+      }
+    });
+    res.json(replacerBigInt(lectura));
+  } catch (error) {
+    console.error('Error al marcar novedad como leída:', error);
+    res.status(500).json({ error: 'Error al registrar lectura' });
+  }
+};
+
+// Obtener usuarios que leyeron una novedad
+export const getLectoresNovedad = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const lecturas = await prisma.novedadLecturaUsuario.findMany({
+      where: { novedadId: Number(id) },
+      include: { usuario: true }
+    });
+    res.json(replacerBigInt(lecturas));
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener lectores' });
+  }
+};
+
